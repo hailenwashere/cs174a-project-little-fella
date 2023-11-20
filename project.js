@@ -32,6 +32,12 @@ export class Project extends Scene {
 
         // *** Materials
         this.materials = {
+            skin: new Material(new defs.Phong_Shader(),
+                {ambient: 0.4, diffusivity: 0.6, color: hex_color("ffdbac")}),
+            pants: new Material(new defs.Phong_Shader(),
+                {ambient: 0, diffusivity: 0, color: hex_color("687796")}),
+            shirt: new Material(new defs.Phong_Shader(),
+                {ambient: 0.4, diffusivity: 0.6, color: hex_color("ff0000")}),
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
@@ -125,29 +131,29 @@ export class Project extends Scene {
         
         // draw head
         var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
-        this.shapes.s3.draw(context, program_state, head_transform, this.materials.test);
+        this.shapes.s3.draw(context, program_state, head_transform, this.materials.skin);
 
         // draw body
         var body_transform = model_transform.times(Mat4.scale(0.4, 0.5, 0.4));
-        this.shapes.cube.draw(context, program_state, body_transform, this.materials.test);
+        this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
 
         // draw legs
         var left_leg_transform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.rotation(swayAngle, 1, 0, 0));
         var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
-        this.shapes.cube.draw(context, program_state, left_leg_transform, this.materials.test);
-        this.shapes.cube.draw(context, program_state, right_leg_tranform, this.materials.test);
+        this.shapes.cube.draw(context, program_state, left_leg_transform, this.materials.pants);
+        this.shapes.cube.draw(context, program_state, right_leg_tranform, this.materials.pants);
 
         // draw arms
         var left_arm_transform = model_transform.times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
         var right_arm_tranform = left_arm_transform.times(Mat4.translation(1.4, 0, 0))
-        this.shapes.cube.draw(context, program_state, left_arm_transform, this.materials.test);
-        this.shapes.cube.draw(context, program_state, right_arm_tranform, this.materials.test);
+        this.shapes.cube.draw(context, program_state, left_arm_transform, this.materials.skin);
+        this.shapes.cube.draw(context, program_state, right_arm_tranform, this.materials.skin);
 
         // draw hands
         var left_hand = model_transform.times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
         var right_hand = left_hand.times(Mat4.translation(9.6, 0, 0));
-        this.shapes.s4.draw(context, program_state, left_hand, this.materials.test);
-        this.shapes.s4.draw(context, program_state, right_hand, this.materials.test);
+        this.shapes.s4.draw(context, program_state, left_hand, this.materials.skin);
+        this.shapes.s4.draw(context, program_state, right_hand, this.materials.skin);
     }
 
     display(context, program_state) {
@@ -193,7 +199,7 @@ export class Project extends Scene {
         // The parameters of the Light are: position, color, size
         // program_state.lights = [new Light(light_position, sun_color, 10**sun_rad)];
 
-        // const light_position = vec4(0, 5, 5, 1);
+        //const light_position = vec4(0, 0, 5, 0);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         this.draw_little_fella(context, program_state);
