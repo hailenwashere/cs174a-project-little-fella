@@ -113,6 +113,43 @@ export class Project extends Scene {
         this.the_moon = Mat4.inverse(moon_transform.times(Mat4.translation(0, 0, 5)));
     }
 
+    draw_little_fella(context, program_state) {
+        var model_transform = Mat4.identity();
+
+        let t = program_state.animation_time / 1000.0;
+        let swayAngle = (0.08 * Math.PI);
+        swayAngle = ((swayAngle/2) + ((swayAngle/2) * Math.sin(((2 * Math.PI) / 3) * t)));
+
+        // axes for reference
+        //this.shapes.axes.draw(context, program_state, model_transform, this.materials.test);  // for reference
+        
+        // draw head
+        var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
+        this.shapes.s3.draw(context, program_state, head_transform, this.materials.test);
+
+        // draw body
+        var body_transform = model_transform.times(Mat4.scale(0.4, 0.5, 0.4));
+        this.shapes.cube.draw(context, program_state, body_transform, this.materials.test);
+
+        // draw legs
+        var left_leg_transform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.rotation(swayAngle, 1, 0, 0));
+        var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
+        this.shapes.cube.draw(context, program_state, left_leg_transform, this.materials.test);
+        this.shapes.cube.draw(context, program_state, right_leg_tranform, this.materials.test);
+
+        // draw arms
+        var left_arm_transform = model_transform.times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
+        var right_arm_tranform = left_arm_transform.times(Mat4.translation(1.4, 0, 0))
+        this.shapes.cube.draw(context, program_state, left_arm_transform, this.materials.test);
+        this.shapes.cube.draw(context, program_state, right_arm_tranform, this.materials.test);
+
+        // draw hands
+        var left_hand = model_transform.times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
+        var right_hand = left_hand.times(Mat4.translation(9.6, 0, 0));
+        this.shapes.s4.draw(context, program_state, left_hand, this.materials.test);
+        this.shapes.s4.draw(context, program_state, right_hand, this.materials.test);
+    }
+
     display(context, program_state) {
         // display():  Called once per frame of animation.
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
@@ -158,22 +195,18 @@ export class Project extends Scene {
 
         // const light_position = vec4(0, 5, 5, 1);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
+
+        this.draw_little_fella(context, program_state);
         
         //this.shapes.axes.draw(context, program_state, model_transform, this.materials.test);  // for reference
-        var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
-        this.shapes.s3.draw(context, program_state, head_transform, this.materials.test);
+        
         //var body_transform = model_transform.times(Mat4.scale(1.2, 1.2, 1.2)).times(Mat4.rotation(-2.2, 0, 0, 1)).times(Mat4.rotation(3.2, 1, 1, 0)).times(Mat4.rotation(-0.9, 1, 0, 0));
         //var body_transform = model_transform.times(Mat4.rotation(-2.35, 0, 0, 1));
         //var body_transform = model_transform.times(Mat4.translation(-0.3, 0, -0.3));
         //this.shapes.tetrahedron.draw(context, program_state, body_transform, this.materials.test);
-        var body_transform = model_transform.times(Mat4.scale(0.4, 0.5, 0.4));
-        this.shapes.cube.draw(context, program_state, body_transform, this.materials.test);
-        var left_leg_transform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2.5, 0));
-        var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2.5, 0));
-        var testing = model_transform.times(Mat4.scale(0.5, 1, 1));
+        
         //this.shapes.cube.draw(context, program_state, testing, this.materials.test);
-        this.shapes.cube.draw(context, program_state, left_leg_transform, this.materials.test);
-        this.shapes.cube.draw(context, program_state, right_leg_tranform, this.materials.test);
+        
         //this.shapes.s4.draw(context, program_state, sun_transform, this.materials.maxAmbRed.override({color: sun_color}));
         //this.draw_planets(context, program_state, model_transform, t);
         
