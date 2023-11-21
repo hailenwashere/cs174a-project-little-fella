@@ -65,15 +65,15 @@ export class Project extends Scene {
 
     make_control_panel() {
         // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => this.initial_camera_location);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        this.new_line();
-        this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        this.new_line();
-        this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.the_moon);
+        // this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => this.initial_camera_location);
+        // this.new_line();
+        // this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
+        // this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
+        // this.new_line();
+        // this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
+        // this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
+        // this.new_line();
+        // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.the_moon);
     }
 
     // new function for drawing planets to keep display function clean
@@ -119,31 +119,15 @@ export class Project extends Scene {
         this.the_moon = Mat4.inverse(moon_transform.times(Mat4.translation(0, 0, 5)));
     }
 
-    rotate_fella_to_tree(context, program_state, time) {
-        var model_transform = Mat4.identity();
-        var result_transforms = new Array(3);
-        if (time < 5) {
-            var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
-        }
-        if (time > 5 && t < 6) {
-            head_transform = head_transform.times(Mat4.rotation(time * 1.5, 0, 1, 0));
-        }
-        if (time >= 6) {
-            head_transform = head_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
-        }
-        result_transforms.push(head_transform);
-        return result_transforms;
-    }
-
     draw_little_fella(context, program_state) {
         var model_transform = Mat4.identity();
 
         let t = program_state.animation_time / 1000.0;
-        let swayAngle = (0.08 * Math.PI);
+        let swayAngle = (0.1 * Math.PI);
         swayAngle = ((swayAngle/2) + ((swayAngle/2) * Math.sin(((2 * Math.PI) / 3) * t)));
 
         // how to stop movement after a certain time
-        if (t >= 10) {
+        if (t >= 14) {
             swayAngle = 0;
         }
 
@@ -153,60 +137,92 @@ export class Project extends Scene {
         // draw head
         var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
         // rotate little fella head
-        if (t > 5 && t < 6) {
+        if (t >= 5 && t < 6) {
             head_transform = head_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
         }
-        if (t >= 6) {
+        else if (t >= 6 && t < 10) {
             head_transform = head_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
         }
-        //var transformations = this.rotate_fella_to_tree(context, program_state, t);
-        //var head_transform = transformations[0];
+        else if (t >= 10 && t < 14) {
+            // if time was x coord and x-pos was y coord, we want to go from (10, 0) to (14, 3.1) --> slope is 0.775
+            var x_transform = 0.7625 * t - (0.7625 * 10);
+            // want to go from (10, 0) to (14, -6.4) --> slope is -1.6
+            var z_transform = -1.6 * t - (-1.6 * 10);
+            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+        }
+        else if (t >= 14) {
+            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.05, 0, -6.45));
+        }
         this.shapes.s3.draw(context, program_state, head_transform, this.materials.skin);
 
         // draw body
         var body_transform = model_transform.times(Mat4.scale(0.4, 0.5, 0.4));
-        if (t > 5 && t < 6) {
+        if (t >= 5 && t < 6) {
             body_transform = body_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
         }
-        if (t >= 6) {
+        else if (t >= 6 && t < 10) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
+        }
+        else if (t >= 10 && t < 14) {
+            var x_transform = -1 * t - (-1 * 10);
+            var z_transform = 1.75 * t - (1.75 * 10);
+            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+        }
+        else if (t >= 14) {
+            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 7));
         }
         this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
 
         // draw legs
-        //var left_leg_transform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.rotation(swayAngle, 1, 0, 0));
-        //var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
-        if (t < 5) {
-            var left_leg_transform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0));
+        var left_leg_transform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0));
+        if (t >= 5 && t < 6) {
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0));
         }
-        else if (t >= 5 && t < 6) {
-            left_leg_transform = model_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0));
+        else if (t >= 6 && t < 10) {
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0));
         }
-        else if (t >= 6) {
-            left_leg_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0));
+        else if (t >= 10 && t < 14) {
+            var x_transform = -4 * t - (-4 * 10);
+            var z_transform = 7 * t - (7 * 10);
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(swayAngle, 1, 0, 0));
+        }
+        else if (t >= 14) {
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
         }
 
-        if (t < 5) {
-            var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0));
+        var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0));
+        if (t >= 5 && t < 6) {
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0));
         }
-        else if (t >= 5 && t < 6) {
-            right_leg_tranform = model_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0));
+        else if (t >= 6 && t < 10) {
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0));
         }
-        else if (t >= 6) {
-            right_leg_tranform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0));
+        else if (t >= 10 && t < 14) {
+            var x_transform = -4 * t - (-4 * 10);
+            var z_transform = 7 * t - (7 * 10);
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
+        }
+        else if (t >= 14) {
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
         }
         this.shapes.cube.draw(context, program_state, left_leg_transform, this.materials.skin);
         this.shapes.cube.draw(context, program_state, right_leg_tranform, this.materials.skin);
 
-        // draw arms -- rotate then scale
-        if (t < 5) {
-            var left_arm_transform = model_transform.times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
-        }
-        else if (t >= 5 && t < 6) {
+        // draw arms
+        var left_arm_transform = model_transform.times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
+        if (t >= 5 && t < 6) {
             left_arm_transform = model_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
         }
-        else if (t >= 6) {
+        else if (t >= 6 && t < 10) {
             left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
+        }
+        else if (t >= 10 && t < 14) {
+            var x_transform = -0.8 * t - (-0.8 * 10);
+            var z_transform = 7 * t - (7 * 10);
+            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+        }
+        else if (t >= 14) {
+            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.3, 0, 28));
         }
         var right_arm_tranform = left_arm_transform.times(Mat4.translation(1.4, 0, 0));
         this.shapes.cube.draw(context, program_state, left_arm_transform, this.materials.skin);
@@ -219,14 +235,20 @@ export class Project extends Scene {
         else if (t >= 5 && t < 6) {
             left_hand_transform = model_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
         }
-        else if (t >= 6) {
+        else if (t >= 6 && t < 10) {
             left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
+        }
+        else if (t >= 10 && t < 14) {
+            var x_transform = -2 * t - (-2 * 10);
+            var z_transform = 3.5 * t - (3.5 * 10);
+            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+        }
+        else if (t >= 14) {
+            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 14));
         }
         var right_hand_transform = left_hand_transform.times(Mat4.translation(9.6, 0, 0));
         this.shapes.s4.draw(context, program_state, left_hand_transform, this.materials.skin);
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
-
-        
     }
 
     display(context, program_state) {
