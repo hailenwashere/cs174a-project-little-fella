@@ -2,9 +2,9 @@ import {defs, tiny} from './examples/common.js';
 import { Shape_From_File } from './examples/obj-file-demo.js';
 
 const {
-    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene,
+    Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
 } = tiny;
-const { Tetrahedron } = defs;
+const { Tetrahedron, Textured_Phong } = defs;
 
 export class Project extends Scene {
     constructor() {
@@ -50,6 +50,11 @@ trunk: new defs.Capped_Cylinder(15, 15),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             ground: new Material(new defs.Phong_Shader(),
                 {ambient: 0.4, diffusivity: 0.6, color: hex_color("7ec850")}),
+            grass: new Material(new defs.Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1,
+                texture: new Texture("assets/animal-crossing-grass.png")
+            }),
             sky: new Material(new defs.Phong_Shader(),
                 {ambient: 1, specularity: .8, color: hex_color("#94DBF2")}),
             test: new Material(new defs.Phong_Shader(),
@@ -290,7 +295,7 @@ this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true
         var model_transform = Mat4.identity();
         let t = program_state.animation_time / 1000.0;
         var ground_transform = model_transform.times(Mat4.scale(10, .1, 10)).times(Mat4.translation(0, -9, 0));
-        this.shapes.cube.draw(context, program_state, ground_transform, this.materials.ground);
+        this.shapes.cube.draw(context, program_state, ground_transform, this.materials.grass);
     }
 
     display(context, program_state) {
