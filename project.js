@@ -55,8 +55,11 @@ trunk: new defs.Capped_Cylinder(15, 15),
                 ambient: 1,
                 texture: new Texture("assets/animal-crossing-grass.png")
             }),
-            sky: new Material(new defs.Phong_Shader(),
-                {ambient: 1, specularity: .8, color: hex_color("#94DBF2")}),
+            sky: new Material(new defs.Textured_Phong(),
+                {ambient: 1, 
+                color: hex_color("#000000"),
+                texture: new Texture("assets/sky.png")
+            }),
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
