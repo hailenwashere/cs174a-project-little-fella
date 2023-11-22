@@ -48,6 +48,8 @@ export class Project extends Scene {
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#80461B")}),
             apple: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
+            ground: new Material(new defs.Phong_Shader(),
+                {ambient: 0.4, diffusivity: 0.6, color: hex_color("7ec850")}),
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
@@ -262,7 +264,7 @@ export class Project extends Scene {
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
     }
 
-    draw_tree(context, program_state, t) {
+    draw_tree(context, program_state) {
         // add index parameter later for multiple
         var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 1.7, 2));
         var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 0.4, 2));
@@ -274,11 +276,19 @@ export class Project extends Scene {
         this.shapes.sphere.draw(context, program_state, right_transform, this.materials.tree);
         this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk);
 
+        let t = program_state.animation_time / 1000.0;
         var apple_transform;
-        if(this.apple_dropping) {
-            apple_transform = apple_transform.times(Mat4.translation(0, 0, -1 * (t - this.drop_time)))
+        if (this.apple_dropping) {
+            apple_transform = apple_transform.times(Mat4.translation(0, 0, -1 * (t - this.drop_time)));
         } else apple_transform = Mat4.identity().times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(12, 6, 8));
         this.shapes.sphere.draw(context, program_state, apple_transform, this.materials.apple);
+    }
+
+    draw_ground(context, program_state) {
+        var model_transform = Mat4.identity();
+        let t = program_state.animation_time / 1000.0;
+        var ground_transform = model_transform.times(Mat4.scale(10, .1, 10)).times(Mat4.translation(0, -9, 0));
+        this.shapes.cube.draw(context, program_state, ground_transform, this.materials.ground);
     }
 
     display(context, program_state) {
@@ -329,11 +339,13 @@ export class Project extends Scene {
 
         this.draw_little_fella(context, program_state);
 
-        this.draw_tree(context, program_state, t);
+        this.draw_tree(context, program_state);
+
+        this.draw_ground(context, program_state);
 
         //this.shapes.s4.draw(context, program_state, sun_transform, this.materials.maxAmbRed.override({color: sun_color}));
         //this.draw_planets(context, program_state, model_transform, t);
-        
+
         // // assign to the right camera matrix on press of button
         // if (this.attached != undefined) {
         //     program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1));
