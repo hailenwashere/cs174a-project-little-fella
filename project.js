@@ -23,7 +23,7 @@ export class Project extends Scene {
             tetrahedron: new Tetrahedron(1),
             axes: new defs.Axis_Arrows(),
             cube: new defs.Cube(),
-            trunk: new defs.Capped_Cylinder(15, 15),
+trunk: new defs.Capped_Cylinder(15, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
             // instantiate 4 spheres with 1, 2, 3, 4 for the number of subdivision
@@ -50,6 +50,8 @@ export class Project extends Scene {
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             ground: new Material(new defs.Phong_Shader(),
                 {ambient: 0.4, diffusivity: 0.6, color: hex_color("7ec850")}),
+            sky: new Material(new defs.Phong_Shader(),
+                {ambient: 1, specularity: .8, color: hex_color("#94DBF2")}),
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
@@ -59,7 +61,7 @@ export class Project extends Scene {
             // TODO:  Fill in as many additional material objects as needed in this key/value table.
             //        (Requirement 4)
             maxAmbRed: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 1, color: hex_color("#FF0000")}),
+                {ambient: 1, diffusivity: 0, color: hex_color("#FF0000")}),
             planet1: new Material(new defs.Phong_Shader(),
                 {ambient: 0, diffusivity: 1, color: hex_color("#808080"), specularity: 0}),
             planet2_gouraud: new Material(new Gouraud_Shader(),
@@ -86,7 +88,7 @@ export class Project extends Scene {
         // this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
         // this.new_line();
         // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.the_moon);
-        this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
+this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
     }
 
     // new function for drawing planets to keep display function clean
@@ -343,13 +345,10 @@ export class Project extends Scene {
 
         this.draw_ground(context, program_state);
 
-        //this.shapes.s4.draw(context, program_state, sun_transform, this.materials.maxAmbRed.override({color: sun_color}));
-        //this.draw_planets(context, program_state, model_transform, t);
-
-        // // assign to the right camera matrix on press of button
-        // if (this.attached != undefined) {
-        //     program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1));
-        // }
+        // add in a sky (sphere)
+        var sky_transform = Mat4.identity();
+        sky_transform = sky_transform.times(Mat4.scale(50, 50, 50))
+        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
     }
 }
 
