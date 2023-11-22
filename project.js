@@ -11,6 +11,9 @@ export class Project extends Scene {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
+        this.apple_dropping = false;
+        this.drop_time = 1000000000;
+
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
             torus: new defs.Torus(15, 15),
@@ -20,6 +23,7 @@ export class Project extends Scene {
             tetrahedron: new Tetrahedron(1),
             axes: new defs.Axis_Arrows(),
             cube: new defs.Cube(),
+            trunk: new defs.Capped_Cylinder(15, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
             // instantiate 4 spheres with 1, 2, 3, 4 for the number of subdivision
@@ -38,10 +42,16 @@ export class Project extends Scene {
                 {ambient: 0, diffusivity: 0, color: hex_color("687796")}),
             shirt: new Material(new defs.Phong_Shader(),
                 {ambient: 0.4, diffusivity: 0.6, color: hex_color("ff0000")}),
+            tree: new Material(new defs.Phong_Shader(),
+                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#4F7942")}),
+            trunk: new Material(new defs.Phong_Shader(),
+                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#80461B")}),
+            apple: new Material(new defs.Phong_Shader(),
+                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#992828")}),
+                {ambient: .5, diffusivity: .6, color: hex_color("#992828")}),
             ring: new Material(new Ring_Shader(),
                 {ambient: 1, color: hex_color("B08040")}),
             // TODO:  Fill in as many additional material objects as needed in this key/value table.
@@ -74,6 +84,7 @@ export class Project extends Scene {
         // this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
         // this.new_line();
         // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.the_moon);
+        this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
     }
 
     // new function for drawing planets to keep display function clean
@@ -251,6 +262,25 @@ export class Project extends Scene {
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
     }
 
+    draw_tree(context, program_state, t) {
+        // add index parameter later for multiple
+        var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 1.7, 2));
+        var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 0.4, 2));
+        var right_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(5.6, 0.4, 2));
+        var trunk_transform = Mat4.identity().times(Mat4.rotation(.5 * Math.PI, 1, 0, 0)).times(Mat4.scale(0.4, 0.4, 1.1)).times(Mat4.translation(7, 3, 0.8));
+
+        this.shapes.sphere.draw(context, program_state, top_transform, this.materials.tree);
+        this.shapes.sphere.draw(context, program_state, left_transform, this.materials.tree);
+        this.shapes.sphere.draw(context, program_state, right_transform, this.materials.tree);
+        this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk);
+
+        var apple_transform;
+        if(this.apple_dropping) {
+            apple_transform = apple_transform.times(Mat4.translation(0, 0, -1 * (t - this.drop_time)))
+        } else apple_transform = Mat4.identity().times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(12, 6, 8));
+        this.shapes.sphere.draw(context, program_state, apple_transform, this.materials.apple);
+    }
+
     display(context, program_state) {
         // display():  Called once per frame of animation.
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
@@ -298,7 +328,9 @@ export class Project extends Scene {
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         this.draw_little_fella(context, program_state);
-        
+
+        this.draw_tree(context, program_state, t);
+
         //this.shapes.s4.draw(context, program_state, sun_transform, this.materials.maxAmbRed.override({color: sun_color}));
         //this.draw_planets(context, program_state, model_transform, t);
         
