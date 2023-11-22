@@ -38,6 +38,8 @@ export class Project extends Scene {
                 {ambient: 0, diffusivity: 0, color: hex_color("687796")}),
             shirt: new Material(new defs.Phong_Shader(),
                 {ambient: 0.4, diffusivity: 0.6, color: hex_color("ff0000")}),
+            ground: new Material(new defs.Phong_Shader(),
+                {ambient: 0.4, diffusivity: 0.6, color: hex_color("7ec850")}),
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
             test2: new Material(new Gouraud_Shader(),
@@ -251,6 +253,13 @@ export class Project extends Scene {
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
     }
 
+    draw_ground(context, program_state) {
+        var model_transform = Mat4.identity();
+        let t = program_state.animation_time / 1000.0;
+        var ground_transform = model_transform.times(Mat4.scale(10, .1, 10)).times(Mat4.translation(0, -9, 0));
+        this.shapes.cube.draw(context, program_state, ground_transform, this.materials.ground);
+    }
+
     display(context, program_state) {
         // display():  Called once per frame of animation.
         // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
@@ -298,10 +307,11 @@ export class Project extends Scene {
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         this.draw_little_fella(context, program_state);
-        
+        this.draw_ground(context, program_state);
+
         //this.shapes.s4.draw(context, program_state, sun_transform, this.materials.maxAmbRed.override({color: sun_color}));
         //this.draw_planets(context, program_state, model_transform, t);
-        
+
         // // assign to the right camera matrix on press of button
         // if (this.attached != undefined) {
         //     program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1));
