@@ -58,7 +58,7 @@ trunk: new defs.Capped_Cylinder(15, 15),
             sky: new Material(new defs.Textured_Phong(),
                 {ambient: 1, 
                 color: hex_color("#000000"),
-                texture: new Texture("assets/sky.png")
+                texture: new Texture("assets/imresizer-1700618206745.png")
             }),
             test: new Material(new defs.Phong_Shader(),
                 {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
