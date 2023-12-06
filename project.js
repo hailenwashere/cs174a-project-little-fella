@@ -38,7 +38,7 @@ export class Project extends Scene{
             tetrahedron: new Tetrahedron(1),
             axes: new defs.Axis_Arrows(),
             cube: new defs.Cube(),
-trunk: new defs.Capped_Cylinder(15, 15),
+            trunk: new defs.Capped_Cylinder(15, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
             // instantiate 4 spheres with 1, 2, 3, 4 for the number of subdivision
@@ -374,7 +374,7 @@ trunk: new defs.Capped_Cylinder(15, 15),
         // program_state.lights = [new Light(light_position, sun_color, 10**sun_rad)];
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        // create intro screen
+        // create intro screen -- WORK IN PROGRESS
         var intro_screen_transform = Mat4.identity().times(Mat4.scale(1, 0.9, 0.05)).times(Mat4.translation(0, 0, 175));
         // if (!start_button_click) {
             // this.shapes.cube.draw(context, program_state, intro_screen_transform, this.materials.introScreen);
@@ -387,16 +387,16 @@ trunk: new defs.Capped_Cylinder(15, 15),
 
         this.draw_ground(context, program_state);
 
-        // // *** This draws the colliding outline around the tree trunk and little fella body ***
         var bodies = new Array();
         bodies.push(new Body(this.shapes.trunk, this.materials.trunk, vec3(1, 1 + Math.random())).emplace(this.trunk_location, 0, 0));
         bodies.push(new Body(this.shapes.cube, this.materials.shirt, vec3(1, 1 + Math.random())).emplace(this.little_fella_body_location, 0, 0));
-        const {points, leeway} = this.colliders[this.collider_selection];
-        const size = vec3(1 + leeway, 1 + leeway, 1 + leeway);
-        for (let b of bodies) {
-            // bodies[b] is a Body object
-            points.draw(context, program_state, b.drawn_location.times(Mat4.scale(...size)), this.materials.skin, "LINE_STRIP");
-        }
+        // *** This draws the colliding outline around the tree trunk and little fella body -- not necessary ***
+        // const {points, leeway} = this.colliders[this.collider_selection];
+        // const size = vec3(1 + leeway, 1 + leeway, 1 + leeway);
+        // for (let b of bodies) {
+        //     // bodies[b] is a Body object
+        //     points.draw(context, program_state, b.drawn_location.times(Mat4.scale(...size)), this.materials.skin, "LINE_STRIP");
+        // }
 
         // *** This implements collision detection ***
         const collider = this.colliders[this.collider_selection];
