@@ -11,6 +11,9 @@ export class Project extends Scene{
     constructor() {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
+        this.background_music = new Audio("assets/animal-crossing-theme-song.mp3");
+
+        this.body_tree_collision = False;
 
         this.apple_dropping = false;
         this.drop_time = 1000000000;
@@ -50,6 +53,11 @@ export class Project extends Scene{
 
         // *** Materials
         this.materials = {
+            introScreen: new Material(new defs.Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1,
+                texture: new Texture("assets/intro-screen.jpg")
+            }),
             skin: new Material(new defs.Phong_Shader(),
                 {ambient: 0.4, diffusivity: 0.6, color: hex_color("ffdbac")}),
             pants: new Material(new defs.Phong_Shader(),
@@ -294,6 +302,9 @@ export class Project extends Scene{
         // program_state.projection_transform = Mat4.perspective(
         //     Math.PI / 4, context.width / context.height, .1, 1000);
 
+        // play background music -- won't loop yet though
+        this.background_music.play();
+
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
@@ -304,18 +315,19 @@ export class Project extends Scene{
             Math.PI / 4, context.width / context.height, 1, 100);
 
         // lighting of sun
-        const light_position = vec4(0, 0, 7, 1);  //light position at center of sun sphere
+        const light_position = vec4(-5, 10, 7, 1);  //light position at center of sun sphere
         // The parameters of the Light are: position, color, size
         // program_state.lights = [new Light(light_position, sun_color, 10**sun_rad)];
 
         //const light_position = vec4(0, 0, 5, 0);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
-
-        //var simulation = class Simulation {};
-        // simulation.simulate();
-        // if (program_state.animate)
-        //     simulate(program_state.animation_delta_time);
-        // Body.check_if_colliding()
+        
+        // create intro screen
+        var intro_screen_transform = Mat4.identity().times(Mat4.scale(1, 0.9, 0.05)).times(Mat4.translation(0, 0, 175));
+        // if (!start_button_click) {
+            // this.shapes.cube.draw(context, program_state, intro_screen_transform, this.materials.introScreen);
+        // }
+        // otherwise don't draw it
 
         this.draw_little_fella(context, program_state);
 
@@ -359,6 +371,7 @@ export class Project extends Scene{
                 // velocity so they don't inter-penetrate any further.
                 // console.log("Colliding");
                 a.material = this.materials.shirt; // not seeing this happen
+                this.body_tree_collision = true;
                 // a.linear_velocity = vec3(0, 0, 0);
                 // a.angular_velocity = 0;
             }
