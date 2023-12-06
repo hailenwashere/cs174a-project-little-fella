@@ -1,18 +1,29 @@
 import {defs, tiny} from './examples/common.js';
 import { Shape_From_File } from './examples/obj-file-demo.js';
+import { Body, Simulation, Collision_Demo } from './examples/collisions-demo.js';
 
 const {
     Vector, Vector3, vec, vec3, vec4, color, hex_color, Shader, Matrix, Mat4, Light, Shape, Material, Scene, Texture
 } = tiny;
 const { Tetrahedron, Textured_Phong } = defs;
 
-export class Project extends Scene {
+export class Project extends Scene{
     constructor() {
         // constructor(): Scenes begin by populating initial values like the Shapes and Materials they'll need.
         super();
 
         this.apple_dropping = false;
         this.drop_time = 1000000000;
+
+        // for collision
+        this.colliders = [
+            {intersect_test: Body.intersect_cube, points: new defs.Cube(), leeway: .05}
+        ];
+
+        this.collider_selection = 0;
+
+        this.trunk_location;
+        this.little_fella_body_location;
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
@@ -23,7 +34,10 @@ export class Project extends Scene {
             tetrahedron: new Tetrahedron(1),
             axes: new defs.Axis_Arrows(),
             cube: new defs.Cube(),
-trunk: new defs.Capped_Cylinder(15, 15),
+            trunk: new defs.Capped_Cylinder(15, 15),
+            tree: new Shape_From_File("assets/tree.obj"),
+            palm_tree: new Shape_From_File("assets/palmtree.obj"),
+            //teapot: new Shape_From_File("assets/teapot.obj"),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
             // instantiate 4 spheres with 1, 2, 3, 4 for the number of subdivision
@@ -63,6 +77,10 @@ trunk: new defs.Capped_Cylinder(15, 15),
                 {ambient: .5, diffusivity: .6, color: hex_color("#992828")}),
             ring: new Material(new Ring_Shader(),
                 {ambient: 1, color: hex_color("B08040")}),
+            inactive_color: new Material(new defs.Phong_Shader(),
+                {ambient: 1, specularity: .8, color: hex_color("#94DBF2")}),
+            active_color: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0, color: hex_color("#FF0000")}),
             // TODO:  Fill in as many additional material objects as needed in this key/value table.
             //        (Requirement 4)
             maxAmbRed: new Material(new defs.Phong_Shader(),
@@ -93,50 +111,7 @@ trunk: new defs.Capped_Cylinder(15, 15),
         // this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
         // this.new_line();
         // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.the_moon);
-this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
-    }
-
-    // new function for drawing planets to keep display function clean
-    draw_planets(context, program_state, model_transform, t) {
-        // planet 1 - gray, 2 subdivisions, flat shaded, diffuse only
-        // for planet1_transform, important to rotate about origin FIRST and then translate
-        // also important that the rotation vector is a VECTOR and not a POINT (so use 0 for 4th term in homogeneous representation)
-        var planet1_transform = model_transform.times(Mat4.rotation(0.5 * t, 0, 1, 0).times(Mat4.translation(5, 0, 0)));
-        this.shapes.s2.draw(context, program_state, planet1_transform, this.materials.planet1);
-
-        // planet 2 - swampy green-blue, 3 subdivisions, max specular, low diffuse
-        var planet2_transform = model_transform.times(Mat4.rotation(t/1.5, 0, 1, 0)).times(Mat4.translation(8, 0, 0));
-        var planet2_material;
-        if (t % 2 == 0) {
-            // add phong shading on even second
-            planet2_material = this.materials.planet2_phong;
-        } else {
-            // add gouraud shading on odd second
-            planet2_material = this.materials.planet2_gouraud;
-        }
-        this.shapes.s3.draw(context, program_state, planet2_transform, planet2_material);
-        
-        // planet 3 - muddy brown-orange, 4 subdivisions, max diffuse, specular
-        var planet3_transform = model_transform.times(Mat4.rotation(t/3.5, 0, 1, 0)).times(Mat4.translation(11, 0, 0));
-        this.shapes.s4.draw(context, program_state, planet3_transform, this.materials.planet3);
-        // transform ring to surround planet 3
-        planet3_transform = planet3_transform.times(Mat4.scale(3.5, 3.5, 0.3));
-        this.shapes.torus.draw(context, program_state, planet3_transform, this.materials.ring);
-
-        // planet 4 - soft light blue, 4 subdivisions, smooth phong, high specular
-        var planet4_transform = model_transform.times(Mat4.rotation(t/6, 0, 1, 0)).times(Mat4.translation(14, 0, 0));
-        this.shapes.s4.draw(context, program_state, planet4_transform, this.materials.planet4);
-        // moon - make sure it rotates around planet 4
-        var moon_transform = planet4_transform.times(Mat4.rotation(t, 0, 1, 0)).times(Mat4.translation(2, 0, 0));
-        this.shapes.s1.draw(context, program_state, moon_transform, this.materials.planet1);
-
-        //world space -> camera space, need to get inverse of camera-to-world matrix
-        //spec says to translate 5 units to back away from planet and then invert it
-        this.planet_1 = Mat4.inverse(planet1_transform.times(Mat4.translation(0, 0, 5)));
-        this.planet_2 = Mat4.inverse(planet2_transform.times(Mat4.translation(0, 0, 5)));
-        this.planet_3 = Mat4.inverse(planet3_transform.times(Mat4.translation(0, 0, 5)));
-        this.planet_4 = Mat4.inverse(planet4_transform.times(Mat4.translation(0, 0, 5)));
-        this.the_moon = Mat4.inverse(moon_transform.times(Mat4.translation(0, 0, 5)));
+        this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
     }
 
     draw_little_fella(context, program_state) {
@@ -186,12 +161,15 @@ this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true
         else if (t >= 10 && t < 14) {
             var x_transform = -1 * t - (-1 * 10);
             var z_transform = 1.75 * t - (1.75 * 10);
+            // if (check_if_colliding) continue -- might have to "freeze time" somehow
+            // else change the body transform
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, 0, z_transform));
         }
         else if (t >= 14) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 7));
         }
-        this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
+        this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt); 
+        this.little_fella_body_location = body_transform; // might have to move this code to the spot the body is in when it hits the tree
 
         // draw legs
         var left_leg_transform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(-1.9, -2, 0));
@@ -272,23 +250,29 @@ this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true
     }
 
     draw_tree(context, program_state) {
+        // this.shapes.palm_tree.draw(context, program_state, Mat4.identity(), this.materials.test);
         // add index parameter later for multiple
-        var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 1.7, 2));
-        var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 0.4, 2));
-        var right_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(5.6, 0.4, 2));
-        var trunk_transform = Mat4.identity().times(Mat4.rotation(.5 * Math.PI, 1, 0, 0)).times(Mat4.scale(0.4, 0.4, 1.1)).times(Mat4.translation(7, 3, 0.8));
+        var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 4.5, -4)); // 4.8, 1.7, 2
+        var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 3.2, -4));  //4, 0.4, 2
+        var right_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(5.6, 3.2, -4)); //5.6, 0.4, 2
+        var trunk_transform = Mat4.identity().times(Mat4.rotation(.5 * Math.PI, 1, 0, 0)).times(Mat4.scale(0.4, 0.4, 2.5)).times(Mat4.translation(7, -6, -0.1));  //original translation 7, 3, 0.8    original scale 0.4, 0.4, 1.1
 
+        // this.shapes.tree.draw(context, program_state, Mat4.identity(), this.materials.trunk);
         this.shapes.sphere.draw(context, program_state, top_transform, this.materials.tree);
         this.shapes.sphere.draw(context, program_state, left_transform, this.materials.tree);
         this.shapes.sphere.draw(context, program_state, right_transform, this.materials.tree);
         this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk);
+        this.trunk_location = trunk_transform;
 
         let t = program_state.animation_time / 1000.0;
         var apple_transform;
         if (this.apple_dropping) {
             apple_transform = apple_transform.times(Mat4.translation(0, 0, -1 * (t - this.drop_time)));
-        } else apple_transform = Mat4.identity().times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(12, 6, 8));
+        } else apple_transform = Mat4.identity().times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(12, 9, -9));  // original translation 12, 6, 8
         this.shapes.sphere.draw(context, program_state, apple_transform, this.materials.apple);
+
+        // for apple falling on the ground, can use Inertia_Demo (unser assets/collisions-demo.js) for inspo)
+        
     }
 
     draw_ground(context, program_state) {
@@ -319,23 +303,6 @@ this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
 
-        const t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
-        var sun_transform = Mat4.identity();
-        var model_transform = Mat4.identity();
-
-        //amplitude of sin goes from -1 to 1, so to make from 1 to 3, add 2
-        //ex. (-1 + 2) to (1 + 2) --> 1 to 3
-        //2 * Math.PI / (# of sec)  to make it take "# of sec" to cycle through sine wave once
-        var sun_rad = 2 + Math.sin((2 * Math.PI / 10) * t);
-        sun_transform = sun_transform.times(Mat4.scale(sun_rad, sun_rad, sun_rad));
-
-        //Note: red is (1, 0, 0, 1) and white is (1, 1, 1, 1)
-        //when radius gets larger, turn white; when radius gets smaller, turn red
-        //want amplitude of sin to go from 0 to 1
-        //ex. ((-1 + 1) / 2) to ((1 + 1) / 2) --> 0 to 1
-        var red_to_white = (1 + Math.sin((2 * Math.PI / 10) * t)) / 2;
-        var sun_color = color(1, red_to_white, red_to_white, 1);
-
         // lighting of sun
         const light_position = vec4(0, 0, 7, 1);  //light position at center of sun sphere
         // The parameters of the Light are: position, color, size
@@ -344,11 +311,58 @@ this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true
         //const light_position = vec4(0, 0, 5, 0);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
+        //var simulation = class Simulation {};
+        // simulation.simulate();
+        // if (program_state.animate)
+        //     simulate(program_state.animation_delta_time);
+        // Body.check_if_colliding()
+
         this.draw_little_fella(context, program_state);
 
         this.draw_tree(context, program_state);
 
         this.draw_ground(context, program_state);
+
+        // // *** This draws the colliding outline around the tree trunk and little fella body ***
+        var bodies = new Array();
+        bodies.push(new Body(this.shapes.trunk, this.materials.trunk, vec3(1, 1 + Math.random())).emplace(this.trunk_location, 0, 0));
+        bodies.push(new Body(this.shapes.cube, this.materials.shirt, vec3(1, 1 + Math.random())).emplace(this.little_fella_body_location, 0, 0));
+        const {points, leeway} = this.colliders[this.collider_selection];
+        const size = vec3(1 + leeway, 1 + leeway, 1 + leeway);
+        for (let b of bodies) {
+            // bodies[b] is a Body object
+            points.draw(context, program_state, b.drawn_location.times(Mat4.scale(...size)), this.materials.skin, "LINE_STRIP");
+        }
+
+        // *** This implements collision detection ***
+        const collider = this.colliders[this.collider_selection];
+        // Loop through all bodies (call each "a"):
+        for (let a of bodies) {
+            // Cache the inverse of matrix of body "a" to save time.
+            a.inverse = Mat4.inverse(a.drawn_location);
+
+            // a.linear_velocity = a.linear_velocity.minus(a.center.times(dt));
+            // Apply a small centripetal force to everything.
+            a.material = this.materials.skin;
+            // Default color: white
+
+            // if (a.linear_velocity.norm() == 0)
+            //     continue;
+
+            // *** Collision process is here ***
+            // Loop through all bodies again (call each "b"):
+            for (let b of bodies) {
+                // Pass the two bodies and the collision shape to check_if_colliding():
+                if (!a.check_if_colliding(b, collider))
+                    continue;
+                // If we get here, we collided, so turn red and zero out the
+                // velocity so they don't inter-penetrate any further.
+                // console.log("Colliding");
+                a.material = this.materials.shirt; // not seeing this happen
+                // a.linear_velocity = vec3(0, 0, 0);
+                // a.angular_velocity = 0;
+            }
+        }
 
         // add in a sky (sphere)
         var sky_transform = Mat4.identity();

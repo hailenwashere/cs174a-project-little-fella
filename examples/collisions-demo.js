@@ -69,8 +69,10 @@ export class Body {
         // through a list of discrete sphere points to see if the ellipsoids intersect is *really* a
         // hack (there are perfectly good analytic expressions that can test if two ellipsoids
         // intersect without discretizing them into points).
-        if (this == b)
+        if (this == b) {
+            // console.log("[check_if_colliding] can't collide with itself");
             return false;
+        }
         // Nothing collides with itself.
         // Convert sphere b to the frame where a is a unit sphere:
         const T = this.inverse.times(b.drawn_location, this.temp_matrix);
@@ -79,6 +81,7 @@ export class Body {
         // For each vertex in that b, shift to the coordinate frame of
         // a_inv*b.  Check if in that coordinate frame it penetrates
         // the unit sphere at the origin.  Leave some leeway.
+        // console.log("[check_if_collding] do intersect test");
         return points.arrays.position.some(p =>
             intersect_test(T.times(p.to4(1)).to3(), leeway));
     }
@@ -168,14 +171,14 @@ export class Test_Data {
             text: new Texture("assets/text.png"),
         }
         this.shapes = {
-            donut: new defs.Torus(15, 15, [[0, 2], [0, 1]]),
-            cone: new defs.Closed_Cone(4, 10, [[0, 2], [0, 1]]),
-            capped: new defs.Capped_Cylinder(4, 12, [[0, 2], [0, 1]]),
-            ball: new defs.Subdivision_Sphere(3, [[0, 1], [0, 1]]),
+            // donut: new defs.Torus(15, 15, [[0, 2], [0, 1]]),
+            // cone: new defs.Closed_Cone(4, 10, [[0, 2], [0, 1]]),
+            // capped: new defs.Capped_Cylinder(4, 12, [[0, 2], [0, 1]]),
+            // ball: new defs.Subdivision_Sphere(3, [[0, 1], [0, 1]]),
             cube: new defs.Cube(),
-            prism: new (defs.Capped_Cylinder.prototype.make_flat_shaded_version())(10, 10, [[0, 2], [0, 1]]),
-            gem: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
-            donut2: new (defs.Torus.prototype.make_flat_shaded_version())(20, 20, [[0, 2], [0, 1]]),
+            // prism: new (defs.Capped_Cylinder.prototype.make_flat_shaded_version())(10, 10, [[0, 2], [0, 1]]),
+            // gem: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
+            // donut2: new (defs.Torus.prototype.make_flat_shaded_version())(20, 20, [[0, 2], [0, 1]]),
         };
     }
 
@@ -261,8 +264,8 @@ export class Collision_Demo extends Simulation {
         this.shapes = Object.assign({}, this.data.shapes);
         // Make simpler dummy shapes for representing all other shapes during collisions:
         this.colliders = [
-            {intersect_test: Body.intersect_sphere, points: new defs.Subdivision_Sphere(1), leeway: .5},
-            {intersect_test: Body.intersect_sphere, points: new defs.Subdivision_Sphere(2), leeway: .3},
+            // {intersect_test: Body.intersect_sphere, points: new defs.Subdivision_Sphere(1), leeway: .5},
+            // {intersect_test: Body.intersect_sphere, points: new defs.Subdivision_Sphere(2), leeway: .3},
             {intersect_test: Body.intersect_cube, points: new defs.Cube(), leeway: .1}
         ];
         this.collider_selection = 0;
@@ -346,10 +349,10 @@ export class Collision_Demo extends Simulation {
 
         // Draw an extra bounding sphere around each drawn shape to show
         // the physical shape that is really being collided with:
-        const {points, leeway} = this.colliders[this.collider_selection];
-        const size = vec3(1 + leeway, 1 + leeway, 1 + leeway);
-        for (let b of this.bodies)
-            points.draw(context, program_state, b.drawn_location.times(Mat4.scale(...size)), this.bright, "LINE_STRIP");
+        // const {points, leeway} = this.colliders[this.collider_selection];
+        // const size = vec3(1 + leeway, 1 + leeway, 1 + leeway);
+        // for (let b of this.bodies)
+        //     points.draw(context, program_state, b.drawn_location.times(Mat4.scale(...size)), this.bright, "LINE_STRIP");
     }
 
     show_explanation(document_element) {
