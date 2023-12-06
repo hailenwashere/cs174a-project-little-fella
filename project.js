@@ -31,17 +31,14 @@ export class Project extends Scene{
 
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
-            torus: new defs.Torus(15, 15),
-            torus2: new defs.Torus(3, 15),
+            torus: new defs.Torus(15,15),
+            torus2: new defs.Torus(3,15),
             sphere: new defs.Subdivision_Sphere(4),
-            circle: new defs.Regular_2D_Polygon(1, 15),
+            circle: new defs.Regular_2D_Polygon(1,15),
             tetrahedron: new Tetrahedron(1),
             axes: new defs.Axis_Arrows(),
             cube: new defs.Cube(),
-            trunk: new defs.Capped_Cylinder(15, 15),
-            tree: new Shape_From_File("assets/tree.obj"),
-            palm_tree: new Shape_From_File("assets/palmtree.obj"),
-            //teapot: new Shape_From_File("assets/teapot.obj"),
+trunk: new defs.Capped_Cylinder(15, 15),
             // TODO:  Fill in as many additional shape instances as needed in this key/value table.
             //        (Requirement 1)
             // instantiate 4 spheres with 1, 2, 3, 4 for the number of subdivision
@@ -49,7 +46,13 @@ export class Project extends Scene{
             s1: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(1),
             s2: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
             s3: new defs.Subdivision_Sphere(3),
-            s4: new defs.Subdivision_Sphere(4)
+            s4: new defs.Subdivision_Sphere(4),
+
+            ocean: new defs.Cube(),
+            ground: new (defs.Capped_Cylinder.prototype.make_flat_shaded_version())(1, 12),
+            seashell: new Shape_From_File("assets/seashell.obj"),
+            grass: new Shape_From_File("assets/grass.obj"),
+
         };
 
         // *** Materials
@@ -60,66 +63,47 @@ export class Project extends Scene{
                 texture: new Texture("assets/intro-screen.jpg")
             }),
             skin: new Material(new defs.Phong_Shader(),
-                {ambient: 0.4, diffusivity: 0.6, color: hex_color("ffdbac")}),
+                {ambient: 0.4, diffusivity: 0.6, color: hex_color("#ffdbac")}),
             pants: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 0, color: hex_color("687796")}),
+                {ambient: 0, diffusivity: 0, color: hex_color("#687796")}),
             shirt: new Material(new defs.Phong_Shader(),
-                {ambient: 0.4, diffusivity: 0.6, color: hex_color("ff0000")}),
+                {ambient: 0.4, diffusivity: 0.6, color: hex_color("#ff0000")}),
             tree: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#4F7942")}),
             trunk: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#80461B")}),
             apple: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
-            ground: new Material(new defs.Phong_Shader(),
-                {ambient: 0.4, diffusivity: 0.6, color: hex_color("7ec850")}),
+            sand: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0.6, color: hex_color("#C2B280")}),
+            rock: new Material(new defs.Phong_Shader(),
+                {ambient: 1, diffusivity: 0.6, color: hex_color("#888c8d")}),
             grass: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
-                texture: new Texture("assets/animal-crossing-grass.png")
+                texture: new Texture("assets/grass.png")
             }),
-            sky: new Material(new defs.Phong_Shader(),
-                {ambient: 1, specularity: .8, color: hex_color("#94DBF2")}),
-            test: new Material(new defs.Phong_Shader(),
-                {ambient: .4, diffusivity: .6, color: hex_color("#ffffff")}),
-            test2: new Material(new Gouraud_Shader(),
-                {ambient: .5, diffusivity: .6, color: hex_color("#992828")}),
-            ring: new Material(new Ring_Shader(),
-                {ambient: 1, color: hex_color("B08040")}),
-            inactive_color: new Material(new defs.Phong_Shader(),
-                {ambient: 1, specularity: .8, color: hex_color("#94DBF2")}),
-            active_color: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0, color: hex_color("#FF0000")}),
-            // TODO:  Fill in as many additional material objects as needed in this key/value table.
-            //        (Requirement 4)
-            maxAmbRed: new Material(new defs.Phong_Shader(),
-                {ambient: 1, diffusivity: 0, color: hex_color("#FF0000")}),
-            planet1: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 1, color: hex_color("#808080"), specularity: 0}),
-            planet2_gouraud: new Material(new Gouraud_Shader(),
-                {ambient: 0, diffusivity: 0.1, color: hex_color("#80FFFF"), specularity: 1}),
-            planet2_phong: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 0.1, color: hex_color("#80FFFF"), specularity: 1}),
-            planet3: new Material(new defs.Phong_Shader(),
-                {ambient: 0, diffusivity: 1, color: hex_color("B08040"), specularity: 1}),
-            planet4: new Material(new defs.Phong_Shader(),
-                {ambient: 0, smoothness: 1, color: hex_color("135EEB"), specularity: 0.9}),
+            shell: new Material(new Textured_Phong(), {
+                color: hex_color("#ffffff"),
+                ambient: 0.5, diffusivity: 0.1, specularity: 0.1,
+                texture: new Texture("assets/shell.png")
+            }),
+            water: new Material(new Texture_Scroll_X(), {
+                color: hex_color("#000000"),
+                ambient: 1,
+                texture: new Texture("assets/water.jpg", "LINEAR_MIPMAP_LINEAR")
+            }),
+            sky: new Material(new defs.Textured_Phong(), {
+                ambient: 1,
+                color: hex_color("#000000"),
+                texture: new Texture("assets/imresizer-1700618206745.png")
+            }),
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
     }
 
     make_control_panel() {
-        // Draw the scene's buttons, setup their actions and keyboard shortcuts, and monitor live measurements.
-        // this.key_triggered_button("View solar system", ["Control", "0"], () => this.attached = () => this.initial_camera_location);
-        // this.new_line();
-        // this.key_triggered_button("Attach to planet 1", ["Control", "1"], () => this.attached = () => this.planet_1);
-        // this.key_triggered_button("Attach to planet 2", ["Control", "2"], () => this.attached = () => this.planet_2);
-        // this.new_line();
-        // this.key_triggered_button("Attach to planet 3", ["Control", "3"], () => this.attached = () => this.planet_3);
-        // this.key_triggered_button("Attach to planet 4", ["Control", "4"], () => this.attached = () => this.planet_4);
-        // this.new_line();
-        // this.key_triggered_button("Attach to moon", ["Control", "m"], () => this.attached = () => this.the_moon);
         this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
     }
 
@@ -337,23 +321,41 @@ export class Project extends Scene{
     }
 
     draw_ground(context, program_state) {
-        var model_transform = Mat4.identity();
-        let t = program_state.animation_time / 1000.0;
-        var ground_transform = model_transform.times(Mat4.scale(10, .1, 10)).times(Mat4.translation(0, -9, 0));
-        this.shapes.cube.draw(context, program_state, ground_transform, this.materials.grass);
+        let ocean_transform = Mat4.identity().times(Mat4.scale(50, .1, 50)).times(Mat4.translation(0, -17, 0));
+        this.shapes.ocean.arrays.texture_coord = this.shapes.ocean.arrays.texture_coord.map(x => x.times(7));
+        this.shapes.ocean.draw(context, program_state, ocean_transform, this.materials.water);
+
+        let sand_transform = Mat4.identity().times(Mat4.rotation(.5 * Math.PI, 1, 0, 0)).times(Mat4.scale(25, 30, .4)).times(Mat4.translation(0, 0, 4));
+        this.shapes.ground.draw(context, program_state, sand_transform, this.materials.sand); // fix texture issue
+
+        let grass_transform = Mat4.identity().times(Mat4.rotation(.5 * Math.PI, 1, 0, 0)).times(Mat4.scale(20, 25, .5)).times(Mat4.translation(0, 0, 2.5));
+        this.shapes.ground.draw(context, program_state, grass_transform, this.materials.grass);
+
+        let rockS_transform = Mat4.identity().times(Mat4.scale(.5, .5, .6));
+        let rockL_transform = Mat4.identity().times(Mat4.scale(.6, .6, .7));
+        this.shapes.s2.draw(context, program_state, rockS_transform.times(Mat4.translation(1, -2, 35)), this.materials.rock);
+        this.shapes.s2.draw(context, program_state, rockL_transform.times(Mat4.translation(0, -1.5, 30)), this.materials.rock);
+        this.shapes.s2.draw(context, program_state, rockS_transform.times(Mat4.translation(-10, -2, -10)), this.materials.rock);
+        this.shapes.s2.draw(context, program_state, rockL_transform.times(Mat4.translation(-8.5, -1.5, -7)), this.materials.rock);
+
+        let blade_transform = Mat4.identity().times(Mat4.scale(.4, .4, .4));
+        this.shapes.grass.draw(context, program_state, blade_transform.times(Mat4.translation(30, -2.5, 10)), this.materials.grass);
+        this.shapes.grass.draw(context, program_state, blade_transform.times(Mat4.translation(-30, -2.5, 20)), this.materials.grass);
+        this.shapes.grass.draw(context, program_state, blade_transform.times(Mat4.translation(40, -2.5, 20)), this.materials.grass);
+        this.shapes.grass.draw(context, program_state, blade_transform.times(Mat4.translation(-40, -2.5, 20)), this.materials.grass);
+        this.shapes.grass.draw(context, program_state, blade_transform.times(Mat4.translation(10, -2.5, 35)), this.materials.grass);
+        this.shapes.grass.draw(context, program_state, blade_transform.times(Mat4.translation(-10, -2.5, 45)), this.materials.grass);
+
+        let seashell_transform = Mat4.identity().times(Mat4.scale(.3, .3, .3));
+        this.shapes.seashell.draw(context, program_state, seashell_transform.times(Mat4.translation(70, -4.4, 10)), this.materials.shell);
+        this.shapes.seashell.draw(context, program_state, seashell_transform.times(Mat4.translation(70, -4.4, 20)), this.materials.shell);
+        this.shapes.seashell.draw(context, program_state, seashell_transform.times(Mat4.translation(-70, -4.4, -12)), this.materials.shell);
+        this.shapes.seashell.draw(context, program_state, seashell_transform.times(Mat4.translation(-30, -4.4, -80)), this.materials.shell);
+        this.shapes.seashell.draw(context, program_state, seashell_transform.times(Mat4.translation(32, -4.4, 80)), this.materials.shell);
     }
 
     display(context, program_state) {
         // display():  Called once per frame of animation.
-        // Setup -- This part sets up the scene's overall camera matrix, projection matrix, and lights:
-        // if (!context.scratchpad.controls) {
-        //     this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
-        //     // Define the global camera and projection matrices, which are stored in program_state.
-        //     program_state.set_camera(this.initial_camera_location);
-        // }
-
-        // program_state.projection_transform = Mat4.perspective(
-        //     Math.PI / 4, context.width / context.height, .1, 1000);
 
         // play background music -- won't loop yet though
         this.background_music.play();
@@ -361,8 +363,7 @@ export class Project extends Scene{
         if (!context.scratchpad.controls) {
             this.children.push(context.scratchpad.controls = new defs.Movement_Controls());
             // Define the global camera and projection matrices, which are stored in program_state.
-            //program_state.set_camera(Mat4.translation(5, -10, -30));
-            program_state.set_camera(Mat4.translation(0, 0, -10))
+            program_state.set_camera(Mat4.translation(0, -5, -40))
         }
         program_state.projection_transform = Mat4.perspective(
             Math.PI / 4, context.width / context.height, 1, 100);
@@ -371,8 +372,6 @@ export class Project extends Scene{
         const light_position = vec4(-5, 10, 7, 1);  //light position at center of sun sphere
         // The parameters of the Light are: position, color, size
         // program_state.lights = [new Light(light_position, sun_color, 10**sun_rad)];
-
-        //const light_position = vec4(0, 0, 5, 0);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
         // create intro screen
@@ -593,52 +592,32 @@ class Gouraud_Shader extends Shader {
     }
 }
 
-class Ring_Shader extends Shader {
-    update_GPU(context, gpu_addresses, graphics_state, model_transform, material) {
-        // update_GPU():  Defining how to synchronize our JavaScript's variables to the GPU's:
-        const [P, C, M] = [graphics_state.projection_transform, graphics_state.camera_inverse, model_transform],
-            PCM = P.times(C).times(M);
-        context.uniformMatrix4fv(gpu_addresses.model_transform, false, Matrix.flatten_2D_to_1D(model_transform.transposed()));
-        context.uniformMatrix4fv(gpu_addresses.projection_camera_model_transform, false,
-            Matrix.flatten_2D_to_1D(PCM.transposed()));
-    }
-
-    shared_glsl_code() {
-        // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
-        return `
-        precision mediump float;
-        varying vec4 point_position;
-        varying vec4 center;
-        `;
-    }
-
-    vertex_glsl_code() {
-        // ********* VERTEX SHADER *********
-        // TODO:  Complete the main function of the vertex shader (Extra Credit Part II).
-        return this.shared_glsl_code() + `
-        attribute vec3 position;
-        uniform mat4 model_transform;
-        uniform mat4 projection_camera_model_transform;
-
-        void main(){
-            gl_Position = projection_camera_model_transform * vec4(position, 1.0);
-            center = model_transform * vec4(0.0, 0.0, 0.0, 1.0);  //just the center
-            point_position = model_transform * vec4(position, 1.0);  //use position of where object is
-        }`;
-    }
-
+class Texture_Scroll_X extends Textured_Phong {
     fragment_glsl_code() {
-        // ********* FRAGMENT SHADER *********
-        // TODO:  Complete the main function of the fragment shader (Extra Credit Part II).
         return this.shared_glsl_code() + `
-        void main(){
-            //had to play around with value multipled to distance to get about 7 rings
-            float factor = sin(18.0 * distance(point_position.xyz, center.xyz));
+            varying vec2 f_tex_coord;
+            uniform sampler2D texture;
+            uniform float animation_time;
+            
+            void main(){
+                // translate the texture varying the s coordinate by 2 texture units/sec
+                float slide_trans = mod(animation_time, 4.) * 3.; 
+                mat4 slide_matrix = mat4( vec4(-1., 0., 0., 0.), 
+                                          vec4( 0., 1., 0., 0.), 
+                                          vec4( 0., 0., 1., 0.),
+                                          vec4(slide_trans, 0., 0., 1.)); 
 
-            //the vector multipled in gl_FragColor determines the color
-            //had to look up conversion of hex color "B08040" to RGB color
-            gl_FragColor = factor * vec4(0.69, 0.50, 0.25, 1);
-        }`;
+                vec4 new_tex_coord = vec4(f_tex_coord, 0, 0) + vec4(1., 1., 0., 1.); 
+                new_tex_coord = slide_matrix * new_tex_coord; 
+                vec4 tex_color = texture2D(texture, new_tex_coord.xy);
+               
+                if( tex_color.w < .01 ) discard;
+
+                // compute initial (ambient) color
+                gl_FragColor = vec4( ( tex_color.xyz + shape_color.xyz ) * ambient, shape_color.w * tex_color.w ); 
+
+                // compute final color with light contributions
+                gl_FragColor.xyz += phong_model_lights( normalize( N ), vertex_worldspace );  
+        } `;
     }
 }
-
