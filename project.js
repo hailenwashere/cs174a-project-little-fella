@@ -13,7 +13,8 @@ export class Project extends Scene{
         super();
         this.background_music = new Audio("assets/animal-crossing-theme-song.mp3");
 
-        this.body_tree_collision = False;
+        this.body_tree_collision = false;
+        this.continue_animation_post_collision = false;
 
         this.apple_dropping = false;
         this.drop_time = 1000000000;
@@ -136,7 +137,7 @@ export class Project extends Scene{
 
         // axes for reference
         //this.shapes.axes.draw(context, program_state, model_transform, this.materials.test);  // for reference
-        
+
         // draw head
         var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
         // rotate little fella head
@@ -146,16 +147,25 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             head_transform = head_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
         }
-        else if (t >= 10 && t < 14) {
+        else if (t >= 10) { //&& t < 14
             // if time was x coord and x-pos was y coord, we want to go from (10, 0) to (14, 3.1) --> slope is 0.775
             var x_transform = 0.7625 * t - (0.7625 * 10);
             // want to go from (10, 0) to (14, -6.4) --> slope is -1.6
             var z_transform = -1.6 * t - (-1.6 * 10);
-            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            if (this.body_tree_collision) {
+                head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.05, 0, -5.6));
+                this.continue_animation_post_collision = true;
+            }
+            else if(this.continue_animation_post_collision) {
+
+            }
+            else {
+                head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            }
         }
-        else if (t >= 14) {
-            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.05, 0, -6.45));
-        }
+        // else if (t >= 14) {
+        //     head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.05, 0, -6.45));
+        // }
         this.shapes.s3.draw(context, program_state, head_transform, this.materials.skin);
 
         // draw body
@@ -166,17 +176,28 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
         }
-        else if (t >= 10 && t < 14) {
+        else if (t >= 10) {  //&& t < 14
             var x_transform = -1 * t - (-1 * 10);
             var z_transform = 1.75 * t - (1.75 * 10);
-            // if (check_if_colliding) continue -- might have to "freeze time" somehow
-            // else change the body transform
-            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            // little fella jumps backs after collision
+            if (this.body_tree_collision) {
+                body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 6));
+                this.continue_animation_post_collision = true;
+            }
+            // after collision movement
+            else if (this.continue_animation_post_collision) {
+
+            }
+            // before collision movement
+            else {
+                body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            }
         }
-        else if (t >= 14) {
-            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 7));
-        }
-        this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt); 
+        // }
+        // else if (t >= 14) {
+        //     body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 7));  //ending position
+        // }
+        this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
         this.little_fella_body_location = body_transform; // might have to move this code to the spot the body is in when it hits the tree
 
         // draw legs
@@ -187,14 +208,23 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0));
         }
-        else if (t >= 10 && t < 14) {
+        else if (t >= 10) { //&& t < 14
             var x_transform = -4 * t - (-4 * 10);
             var z_transform = 7 * t - (7 * 10);
-            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(swayAngle, 1, 0, 0));
+            if (this.body_tree_collision) {
+                left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 24));
+                this.continue_animation_post_collision = true;
+            }
+            else if (this.continue_animation_post_collision) {
+
+            }
+            else {
+                left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(swayAngle, 1, 0, 0));
+            }
         }
-        else if (t >= 14) {
-            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
-        }
+        // else if (t >= 14) {
+        //     left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
+        // }
 
         var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0));
         if (t >= 5 && t < 6) {
@@ -202,15 +232,24 @@ export class Project extends Scene{
         }
         else if (t >= 6 && t < 10) {
             right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0));
-        }
-        else if (t >= 10 && t < 14) {
+        } 
+        else if (t >= 10 ) { //&& t < 14
             var x_transform = -4 * t - (-4 * 10);
             var z_transform = 7 * t - (7 * 10);
-            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
+            if (this.body_tree_collision) {
+                right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 24));
+                this.continue_animation_post_collision = true;
+            }
+            else if (this.continue_animation_post_collision) {
+
+            }
+            else {
+                right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
+            }
         }
-        else if (t >= 14) {
-            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
-        }
+        // else if (t >= 14) {
+        //     right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
+        // }
         this.shapes.cube.draw(context, program_state, left_leg_transform, this.materials.skin);
         this.shapes.cube.draw(context, program_state, right_leg_tranform, this.materials.skin);
 
@@ -222,43 +261,57 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
         }
-        else if (t >= 10 && t < 14) {
+        else if (t >= 10) { // && t < 14
             var x_transform = -0.8 * t - (-0.8 * 10);
             var z_transform = 7 * t - (7 * 10);
-            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            if (this.body_tree_collision) {
+                left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.3, 0, 24));
+            }
+            else if (this.continue_animation_post_collision) {
+
+            }
+            else {
+                left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            }
         }
-        else if (t >= 14) {
-            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.3, 0, 28));
-        }
+        // else if (t >= 14) {
+        //     left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.3, 0, 28));
+        // }
         var right_arm_tranform = left_arm_transform.times(Mat4.translation(1.4, 0, 0));
         this.shapes.cube.draw(context, program_state, left_arm_transform, this.materials.skin);
         this.shapes.cube.draw(context, program_state, right_arm_tranform, this.materials.skin);
 
         // draw hands
-        if (t < 5) {
-            var left_hand_transform = model_transform.times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
-        }
-        else if (t >= 5 && t < 6) {
+        var left_hand_transform = model_transform.times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
+        if (t >= 5 && t < 6) {
             left_hand_transform = model_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
         }
         else if (t >= 6 && t < 10) {
             left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
         }
-        else if (t >= 10 && t < 14) {
+        else if (t >= 10) { // && t < 14
             var x_transform = -2 * t - (-2 * 10);
             var z_transform = 3.5 * t - (3.5 * 10);
-            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            if (this.body_tree_collision) {
+                left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 12));
+                this.continue_animation_post_collision = true;
+            }
+            else if (this.continue_animation_post_collision) {
+
+            }
+            else {
+                left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(x_transform, 0, z_transform));
+            }
         }
-        else if (t >= 14) {
-            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 14));
-        }
+        // else if (t >= 14) {
+        //     left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 14));
+        // }
         var right_hand_transform = left_hand_transform.times(Mat4.translation(9.6, 0, 0));
         this.shapes.s4.draw(context, program_state, left_hand_transform, this.materials.skin);
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
     }
 
     draw_tree(context, program_state) {
-        // this.shapes.palm_tree.draw(context, program_state, Mat4.identity(), this.materials.test);
         // add index parameter later for multiple
         var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 4.5, -4)); // 4.8, 1.7, 2
         var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 3.2, -4));  //4, 0.4, 2
@@ -280,7 +333,7 @@ export class Project extends Scene{
         this.shapes.sphere.draw(context, program_state, apple_transform, this.materials.apple);
 
         // for apple falling on the ground, can use Inertia_Demo (unser assets/collisions-demo.js) for inspo)
-        
+
     }
 
     draw_ground(context, program_state) {
@@ -321,7 +374,7 @@ export class Project extends Scene{
 
         //const light_position = vec4(0, 0, 5, 0);
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
-        
+
         // create intro screen
         var intro_screen_transform = Mat4.identity().times(Mat4.scale(1, 0.9, 0.05)).times(Mat4.translation(0, 0, 175));
         // if (!start_button_click) {
@@ -395,7 +448,7 @@ class Gouraud_Shader extends Shader {
 
     shared_glsl_code() {
         // ********* SHARED CODE, INCLUDED IN BOTH SHADERS *********
-        return ` 
+        return `
         precision mediump float;
         const int N_LIGHTS = ` + this.num_lights + `;
         uniform float ambient, diffusivity, specularity, smoothness;
@@ -410,20 +463,20 @@ class Gouraud_Shader extends Shader {
         varying vec3 N, vertex_worldspace;
         varying vec4 vertex_color;
 
-        // ***** PHONG SHADING HAPPENS HERE: *****                                       
-        vec3 phong_model_lights( vec3 N, vec3 vertex_worldspace ){                                        
+        // ***** PHONG SHADING HAPPENS HERE: *****
+        vec3 phong_model_lights( vec3 N, vec3 vertex_worldspace ){
             // phong_model_lights():  Add up the lights' contributions.
             vec3 E = normalize( camera_center - vertex_worldspace );
             vec3 result = vec3( 0.0 );
             for(int i = 0; i < N_LIGHTS; i++){
-                // Lights store homogeneous coords - either a position or vector.  If w is 0, the 
-                // light will appear directional (uniform direction from all points), and we 
+                // Lights store homogeneous coords - either a position or vector.  If w is 0, the
+                // light will appear directional (uniform direction from all points), and we
                 // simply obtain a vector towards the light by directly using the stored value.
-                // Otherwise if w is 1 it will appear as a point light -- compute the vector to 
-                // the point light's location from the current surface point.  In either case, 
-                // fade (attenuate) the light as the vector needed to reach it gets longer.  
-                vec3 surface_to_light_vector = light_positions_or_vectors[i].xyz - 
-                                               light_positions_or_vectors[i].w * vertex_worldspace;                                             
+                // Otherwise if w is 1 it will appear as a point light -- compute the vector to
+                // the point light's location from the current surface point.  In either case,
+                // fade (attenuate) the light as the vector needed to reach it gets longer.
+                vec3 surface_to_light_vector = light_positions_or_vectors[i].xyz -
+                                               light_positions_or_vectors[i].w * vertex_worldspace;
                 float distance_to_light = length( surface_to_light_vector );
 
                 vec3 L = normalize( surface_to_light_vector );
@@ -433,7 +486,7 @@ class Gouraud_Shader extends Shader {
                 float diffuse  =      max( dot( N, L ), 0.0 );
                 float specular = pow( max( dot( N, H ), 0.0 ), smoothness );
                 float attenuation = 1.0 / (1.0 + light_attenuation_factors[i] * distance_to_light * distance_to_light );
-                
+
                 vec3 light_contribution = shape_color.xyz * light_colors[i].xyz * diffusivity * diffuse
                                                           + light_colors[i].xyz * specularity * specular;
                 result += attenuation * light_contribution;
@@ -445,13 +498,13 @@ class Gouraud_Shader extends Shader {
     vertex_glsl_code() {
         // ********* VERTEX SHADER *********
         return this.shared_glsl_code() + `
-            attribute vec3 position, normal;                            
+            attribute vec3 position, normal;
             // Position is expressed in object coordinates.
-            
+
             uniform mat4 model_transform;
             uniform mat4 projection_camera_model_transform;
-    
-            void main(){                                                                   
+
+            void main(){
                 // The vertex's final resting place (in NDCS):
                 gl_Position = projection_camera_model_transform * vec4( position, 1.0 );
                 // The final normal vector in screen space.
@@ -469,7 +522,7 @@ class Gouraud_Shader extends Shader {
         // A fragment is a pixel that's overlapped by the current triangle.
         // Fragments affect the final image or get discarded due to depth.
         return this.shared_glsl_code() + `
-            void main(){                                                           
+            void main(){
                 // Compute an initial (ambient) color:
                 //gl_FragColor = vec4( shape_color.xyz * ambient, shape_color.w );
                 // Compute the final color with contributions from lights:
@@ -566,7 +619,7 @@ class Ring_Shader extends Shader {
         attribute vec3 position;
         uniform mat4 model_transform;
         uniform mat4 projection_camera_model_transform;
-        
+
         void main(){
             gl_Position = projection_camera_model_transform * vec4(position, 1.0);
             center = model_transform * vec4(0.0, 0.0, 0.0, 1.0);  //just the center
@@ -584,7 +637,7 @@ class Ring_Shader extends Shader {
 
             //the vector multipled in gl_FragColor determines the color
             //had to look up conversion of hex color "B08040" to RGB color
-            gl_FragColor = factor * vec4(0.69, 0.50, 0.25, 1);  
+            gl_FragColor = factor * vec4(0.69, 0.50, 0.25, 1);
         }`;
     }
 }
