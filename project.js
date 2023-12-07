@@ -101,10 +101,17 @@ export class Project extends Scene{
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.top_camera_location = Mat4.look_at(vec3(0, 20, 10), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.bottom_camera_location = Mat4.look_at(vec3(0, 1, 10), vec3(0, 0, 0), vec3(0, 1, 0));
+        this.camerasettings = 0; // cannot exceed 1 or -1, 1 for top, 0 for middle, -1
     }
 
     make_control_panel() {
         this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
+        this.new_line();
+        this.key_triggered_button("Diagonal view", ["Control", "1"], () => this.attached = () => this.diagonal_view);
+        this.key_triggered_button("Front view", ["Control", "2"], () => this.attached = () => this.bottom_view);
+        this.key_triggered_button("Top view",  ["Control", "3"], () => this.attached = () => this.top_view);
     }
 
     draw_little_fella(context, program_state) {
@@ -124,6 +131,11 @@ export class Project extends Scene{
 
         // draw head
         var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
+
+        // x and z coordinates to return to camera matrix
+        var ret_x_transform = 0;
+        var ret_z_transform = 0;
+
         // rotate little fella head
         if (t >= 5 && t < 6) {
             head_transform = head_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
@@ -134,8 +146,11 @@ export class Project extends Scene{
         else if (t >= 10) { //&& t < 14
             // if time was x coord and x-pos was y coord, we want to go from (10, 0) to (14, 3.1) --> slope is 0.775
             var x_transform = 0.7625 * t - (0.7625 * 10);
+            ret_x_transform = x_transform;
             // want to go from (10, 0) to (14, -6.4) --> slope is -1.6
             var z_transform = -1.6 * t - (-1.6 * 10);
+            ret_z_transform = z_transform;
+
             if (this.body_tree_collision) {
                 head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.05, 0, -5.6));
                 this.continue_animation_post_collision = true;
@@ -293,6 +308,8 @@ export class Project extends Scene{
         var right_hand_transform = left_hand_transform.times(Mat4.translation(9.6, 0, 0));
         this.shapes.s4.draw(context, program_state, left_hand_transform, this.materials.skin);
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
+
+        return [ret_x_transform, ret_z_transform];
     }
 
     draw_tree(context, program_state) {
@@ -381,7 +398,7 @@ export class Project extends Scene{
         // }
         // otherwise don't draw it
 
-        this.draw_little_fella(context, program_state);
+        const [head_x, head_z] = this.draw_little_fella(context, program_state);
 
         this.draw_tree(context, program_state);
 
@@ -433,6 +450,15 @@ export class Project extends Scene{
         var sky_transform = Mat4.identity();
         sky_transform = sky_transform.times(Mat4.scale(50, 50, 50))
         this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
+
+        this.diagonal_view = Mat4.look_at(vec3(0, 10, 20), vec3(head_x, 0, head_z), vec3(0, 1, 0));
+        this.top_view = Mat4.look_at(vec3(0, 20, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
+        this.bottom_view = Mat4.look_at(vec3(0, 1, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
+
+        if (this.attached != undefined) {
+            program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1));
+        }
+
     }
 }
 
