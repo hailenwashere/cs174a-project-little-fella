@@ -684,7 +684,7 @@ export class Project extends Scene{
         this.bottom_view = Mat4.look_at(vec3(0, 1, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
 
         if (this.attached != undefined) {
-            program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1));
+            program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.03));
         }
 
     }
