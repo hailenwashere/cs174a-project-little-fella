@@ -76,6 +76,16 @@ export class Project extends Scene{
                 {ambient: 0.5, diffusivity: 0.6, specularity: 0.1, color: hex_color("#4F7942")}),
             trunk: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, specularity: 0.1, color: hex_color("#80461B")}),
+            tree2: new Material(new defs.Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1, diffusivity: 0.1, specularity: 0.2,
+                texture: new Texture("assets/tree.png")
+            }),
+            trunk2: new Material(new defs.Textured_Phong(), {
+                color: hex_color("#000000"),
+                ambient: 1,
+                texture: new Texture("assets/trunk.jpeg")
+            }),
             apple: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             rock: new Material(new defs.Phong_Shader(),
@@ -123,6 +133,7 @@ export class Project extends Scene{
                 texture: new Texture("assets/Low Poly Palm Tree Render for Youtube.mtl")
             })
         }
+        this.shapes.trunk.arrays.texture_coord.forEach(p => p.scale_by(0.1));
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         this.top_camera_location = Mat4.look_at(vec3(0, 20, 10), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -422,16 +433,16 @@ export class Project extends Scene{
 
     draw_tree(context, program_state) {
         // add index parameter later for multiple
-        var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 4.5, -4)); // 4.8, 1.7, 2
-        var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 3.2, -4));  //4, 0.4, 2
-        var right_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(5.6, 3.2, -4)); //5.6, 0.4, 2
+        var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 3.9, -4)); // 4.8, 1.7, 2
+        var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 2.6, -4));  //4, 0.4, 2
+        var right_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(5.6, 2.6, -4)); //5.6, 0.4, 2
         var trunk_transform = Mat4.identity().times(Mat4.rotation(.5 * Math.PI, 1, 0, 0)).times(Mat4.scale(0.4, 0.4, 2.5)).times(Mat4.translation(7, -6, -0.1));  //original translation 7, 3, 0.8    original scale 0.4, 0.4, 1.1
 
         // this.shapes.tree.draw(context, program_state, Mat4.identity(), this.materials.trunk);
-        this.shapes.sphere.draw(context, program_state, top_transform, this.materials.tree);
-        this.shapes.sphere.draw(context, program_state, left_transform, this.materials.tree);
-        this.shapes.sphere.draw(context, program_state, right_transform, this.materials.tree);
-        this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk);
+        this.shapes.sphere.draw(context, program_state, top_transform, this.materials.tree2);
+        this.shapes.sphere.draw(context, program_state, left_transform, this.materials.tree2);
+        this.shapes.sphere.draw(context, program_state, right_transform, this.materials.tree2);
+        this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk2);
         this.trunk_location = trunk_transform;
 
         let t = program_state.animation_time / 1000.0;
