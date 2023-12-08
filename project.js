@@ -594,6 +594,8 @@ export class Project extends Scene{
 
         this.draw_ground(context, program_state);
 
+        this.draw_sky(context, program_state);
+
         this.draw_palmtrees(context, program_state);
 
         this.draw_specialtree(context, program_state);
@@ -630,11 +632,6 @@ export class Project extends Scene{
                 this.body_tree_collision = true;
             }
         }
-
-        // add in a sky (sphere)
-        var sky_transform = Mat4.identity();
-        sky_transform = sky_transform.times(Mat4.scale(50, 50, 50))
-        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
 
         this.diagonal_view = Mat4.look_at(vec3(0, 10, 20), vec3(head_x, 0, head_z), vec3(0, 1, 0));
         this.top_view = Mat4.look_at(vec3(0, 20, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
