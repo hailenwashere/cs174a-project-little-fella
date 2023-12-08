@@ -195,8 +195,10 @@ export class Project extends Scene{
         }
         else if (t >= 18.5 && t < 25.5) {
             var x_transform = 0.1857 * t - (0.1857 * 18.5);
+            ret_x_transform = x_transform;  
             var y_transform = 0.1428 * t - (0.1428 * 18.5);
             var z_transform = -7.1285 * t - (-7.1285 * 18.5);
+            ret_z_transform = z_transform;
             head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, y_transform, z_transform));
         }
         else if (t >= 25.5) {
