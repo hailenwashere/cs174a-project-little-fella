@@ -454,8 +454,10 @@ export class Project extends Scene{
     }
 
     draw_palmtrees(context, program_state) {
-        let palmtree_transform = Mat4.identity().times(Mat4.scale(1.5, 1.5, 1.5)).times(Mat4.translation(0, 3, 0));
-        this.shapes.palmtree.draw(context, program_state, palmtree_transform, this.materials.palmtree);
+        let palmtree_transform = Mat4.identity().times(Mat4.scale(1.5, 1.5, 1.5)).times(Mat4.translation(0, 1.8, 0));
+        this.shapes.palmtree.draw(context, program_state, palmtree_transform.times(Mat4.translation(0, 0, -17)), this.materials.tree);
+        this.shapes.palmtree.draw(context, program_state, palmtree_transform.times(Mat4.translation(-14, 0, 2)), this.materials.tree);
+        this.shapes.palmtree.draw(context, program_state, palmtree_transform.times(Mat4.translation(13, 0, 6)), this.materials.tree);
     }
 
     draw_specialtree(context, program_state) {
@@ -464,6 +466,15 @@ export class Project extends Scene{
         this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(1.5, 0, 1, 0).times(Mat4.translation(7, 0, -2))), this.materials.tree);
         this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(0, -3, 0)).times(Mat4.rotation(-0.8, 0, 1, 0)).times(Mat4.translation(0, 3, 0)).times(Mat4.translation(7, 0, -2)), this.materials.tree);
         this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(1.5, 0, 1, 0).times(Mat4.translation(7, 0, -2))), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(3.7, 0, 1, 0).times(Mat4.translation(-7, 0, 5))), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(8, 0, 1, 0).times(Mat4.translation(15, 0, -5))), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(14, 0, 11)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(14, 0, -6)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(-14, 0, -8)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(-15, 0, 9)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(-6, 0, 14)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(3, 0, 13)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(8, 0, 14)), this.materials.tree);
     }
 
     draw_ouch(context, program_state) {
@@ -499,11 +510,6 @@ export class Project extends Scene{
         // program_state.lights = [new Light(light_position, sun_color, 10**sun_rad)];
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        // create intro screen -- WORK IN PROGRESS
-        var intro_screen_transform = Mat4.identity().times(Mat4.scale(1, 0.9, 0.05)).times(Mat4.translation(0, 0, 175));
-        // if (!start_button_click) {
-            // this.shapes.cube.draw(context, program_state, intro_screen_transform, this.materials.introScreen);
-        // }
         // otherwise don't draw it
         // this.shapes.axes.draw(context, program_state, Mat4.identity(), this.materials.skin);
         // this.shapes.cube.draw(context, program_state, Mat4.identity().times(Mat4.rotation(program_state.animation_time/1000 * 0.7, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-2, 0, -19.7)), this.materials.sky);
@@ -514,7 +520,7 @@ export class Project extends Scene{
 
         this.draw_ground(context, program_state);
 
-        // this.draw_palmtrees(context, program_state);
+        this.draw_palmtrees(context, program_state);
 
         this.draw_specialtree(context, program_state);
 
