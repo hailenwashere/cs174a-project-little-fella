@@ -232,7 +232,7 @@ export class Project extends Scene{
         }
         else if (t >= 18.5 && t < 25.5) {
             var x_transform = 0.1857 * t - (0.1857 * 18.5);
-            this.ret_x_transform = this.ret_x_transform - (x_transform * 0.1);
+            this.ret_x_transform = this.ret_x_transform - Math.sqrt(x_transform * 0.0015);
             var y_transform = 0.1428 * t - (0.1428 * 18.5);
             // this.y_transform = y_transform;
             var z_transform = -7.1285 * t - (-7.1285 * 18.5);
