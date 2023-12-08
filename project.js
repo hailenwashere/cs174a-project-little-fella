@@ -53,7 +53,6 @@ export class Project extends Scene{
             seashell: new Shape_From_File("assets/seashell.obj"),
             grass: new Shape_From_File("assets/grass.obj"),
             palmtree: new Shape_From_File("assets/palmtree3.obj"),
-            // teapot: new Shape_From_File("assets/teapot.obj"),
             specialtree: new Shape_From_File("assets/tree.obj"),
         };
 
@@ -120,12 +119,7 @@ export class Project extends Scene{
                 ambient: 1,
                 color: hex_color("#000000"),
                 texture: new Texture("assets/Low Poly Palm Tree Render for Youtube.mtl")
-            }),
-            ouch: new Material(new defs.Textured_Phong(), {
-                ambient: 1,
-                color: hex_color("#000000"),
-                texture: new Texture("assets/ouch.jpg")
-            }),
+            })
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -150,7 +144,6 @@ export class Project extends Scene{
         let t = program_state.animation_time / 1000.0;
         let swayAngle = (0.1 * Math.PI);
         swayAngle = ((swayAngle/2) + ((swayAngle/2) * Math.sin(((2 * Math.PI) / 3) * t)));
-        // console.log(t);
 
         // how to stop movement after a certain time
         // if (t >= 14) {
@@ -256,12 +249,6 @@ export class Project extends Scene{
         else if (t >= 25.5) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -0.8, 60));
         }
-        // else if (t >= 27 && t < 28) {
-
-        // }
-        // else if (t >= 28) {
-        //     body_transform = body_transform.times(Mat4.rotation(45, 0, 1, 0)).times(Mat4.translation(-11, -0.9, 54));
-        // }
         this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
         this.little_fella_body_location = body_transform; // might have to move this code to the spot the body is in when it hits the tree
 
@@ -311,7 +298,7 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0));
         } 
-        else if (t >= 10 && t < 17) { //&& t < 14
+        else if (t >= 10 && t < 17) {
             var x_transform = -4 * t - (-4 * 10);
             var z_transform = 7 * t - (7 * 10);
             if (this.body_tree_collision) {
@@ -393,7 +380,7 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
         }
-        else if (t >= 10 && t < 17) { // && t < 14
+        else if (t >= 10 && t < 17) {
             var x_transform = -2 * t - (-2 * 10);
             var z_transform = 3.5 * t - (3.5 * 10);
             if (this.body_tree_collision) {
@@ -548,12 +535,8 @@ export class Project extends Scene{
         // lighting of sun
         const light_position = vec4(-5, 10, 7, 1);  //light position at center of sun sphere
         // The parameters of the Light are: position, color, size
-        // program_state.lights = [new Light(light_position, sun_color, 10**sun_rad)];
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        // otherwise don't draw it
-        // this.shapes.axes.draw(context, program_state, Mat4.identity(), this.materials.skin);
-        // this.shapes.cube.draw(context, program_state, Mat4.identity().times(Mat4.rotation(program_state.animation_time/1000 * 0.7, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-2, 0, -19.7)), this.materials.sky);
 
         const [head_x, head_z] = this.draw_little_fella(context, program_state);
 
@@ -584,28 +567,17 @@ export class Project extends Scene{
         for (let a of bodies) {
             // Cache the inverse of matrix of body "a" to save time.
             a.inverse = Mat4.inverse(a.drawn_location);
-
-            // a.linear_velocity = a.linear_velocity.minus(a.center.times(dt));
-            // Apply a small centripetal force to everything.
             a.material = this.materials.skin;
-            // Default color: white
-
-            // if (a.linear_velocity.norm() == 0)
-            //     continue;
-
             // *** Collision process is here ***
             // Loop through all bodies again (call each "b"):
             for (let b of bodies) {
                 // Pass the two bodies and the collision shape to check_if_colliding():
                 if (!a.check_if_colliding(b, collider))
                     continue;
-                // If we get here, we collided, so turn red and zero out the
-                // velocity so they don't inter-penetrate any further.
+                // If we get here, we collided
                 // console.log("Colliding");
                 a.material = this.materials.shirt; // not seeing this happen
                 this.body_tree_collision = true;
-                // a.linear_velocity = vec3(0, 0, 0);
-                // a.angular_velocity = 0;
             }
         }
 
