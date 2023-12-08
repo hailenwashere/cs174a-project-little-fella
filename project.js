@@ -19,6 +19,10 @@ export class Project extends Scene{
         this.get_start_time_once = false;
         this.start_ouch_time;
 
+        this.body_rotate = 0;
+        this.head_rotate = 0;
+        this.arm_rotate = 0;
+
         this.apple_dropping = false;
         this.got_drop_time = false;
         this.drop_time;
@@ -160,6 +164,7 @@ export class Project extends Scene{
         var model_transform = Mat4.identity();
 
         let t = program_state.animation_time / 1000.0;
+        let dt = program_state.animation_delta_time / 1000.0;
         let swayAngle = (0.1 * Math.PI);
         swayAngle = ((swayAngle/2) + ((swayAngle/2) * Math.sin(((2 * Math.PI) / 3) * t)));
 
@@ -180,7 +185,8 @@ export class Project extends Scene{
 
         // rotate little fella head
         if (t >= 5 && t < 6) {
-            head_transform = head_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+            this.head_rotate = this.head_rotate + (dt * 1.5);
+            head_transform = head_transform.times(Mat4.rotation(this.head_rotate, 0, 1, 0));
         }
         else if (t >= 6 && t < 10) {
             head_transform = head_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
@@ -222,15 +228,19 @@ export class Project extends Scene{
         else if (t >= 25.5) {
             head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(1.3, 1, -49.9));
         }
+        // else if (t >= 27) {
+        //     head_transform = head_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, 2, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.rotation(t * 0.4, 0, 1, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.translation(1.3, 1, -47));
+        // }
         this.shapes.s3.draw(context, program_state, head_transform, this.materials.skin);
 
         // draw body
         var body_transform = model_transform.times(Mat4.scale(0.4, 0.5, 0.4));
         if (t >= 5 && t < 6) {
-            body_transform = body_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+            this.body_rotate = this.body_rotate + (dt * 1.4)
+            body_transform = body_transform.times(Mat4.rotation(this.body_rotate, 0, 1, 0));
         }
         else if (t >= 6 && t < 10) {
-            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
+            body_transform = body_transform.times(Mat4.rotation(this.body_rotate, 0, 1, 0));
         }
         else if (t >= 10 && t < 17) {  //&& t < 14
             var x_transform = -1 * t - (-1 * 10);
@@ -255,8 +265,9 @@ export class Project extends Scene{
             }
         }
         else if (t >= 17 && t < 18) {
+            this.body_rotate = this.body_rotate + (dt * 2);
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4));
-            body_transform = body_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+            body_transform = body_transform.times(Mat4.rotation(this.body_rotate, 0, 1, 0));
         }
         else if (t >= 18 && t < 18.5) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0));
@@ -269,6 +280,9 @@ export class Project extends Scene{
         else if (t >= 25.5) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -0.8, 60));
         }
+        // else if (t > 27) {
+        //     body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(t * 0.4, 0, 1, 0)).times(Mat4.translation(0, -0.8, 53));
+        // }
         this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
         this.little_fella_body_location = body_transform; // might have to move this code to the spot the body is in when it hits the tree
 
