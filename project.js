@@ -80,6 +80,8 @@ export class Project extends Scene{
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             rock: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 0.2, color: hex_color("#888c8d")}),
+            cloud: new Material(new defs.Phong_Shader(),
+                {ambient: 0.9, diffusivity: 0.2, color: hex_color("#fffefc")}),
             grass: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
@@ -117,11 +119,6 @@ export class Project extends Scene{
                 color: hex_color("#000000"),
                 texture: new Texture("assets/ouch.jpg")
             }),
-            palmtree: new Material(new defs.Textured_Phong(), {
-                ambient: 1,
-                color: hex_color("#000000"),
-                texture: new Texture("assets/Low Poly Palm Tree Render for Youtube.mtl")
-            })
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -485,6 +482,49 @@ export class Project extends Scene{
         this.shapes.seashell.draw(context, program_state, seashell_transform.times(Mat4.translation(32, -4.4, 80)), this.materials.shell);
     }
 
+    draw_cloud(context, program_state, x = 0, y = 0, start = 0, scale = 1) {
+        let t = program_state.animation_time / 1000;
+
+        let cloud_transform = Mat4.identity().times(Mat4.rotation(t/60 + start, 0, 1, 0)).times(Mat4.translation(x, y, 0));
+        cloud_transform = cloud_transform.times(Mat4.rotation(-Math.PI/2, 0, 1, 0)).times(Mat4.scale(scale, scale, scale));
+
+        let cloud1_transform = cloud_transform.times(Mat4.scale(3, 2, 2));
+        let cloud2_transform = cloud_transform.times(Mat4.scale(2, 1.5, 1.5)).times(Mat4.translation(1.5, 0, 0));
+        let cloud3_transform = cloud_transform.times(Mat4.scale(2, 1.5, 1)).times(Mat4.translation(-1.5, -0.5, 1));
+        let cloud4_transform = cloud_transform.times(Mat4.scale(1.5, 1.2, 1)).times(Mat4.translation(1.5, -1, 1));
+        let cloud5_transform = cloud_transform.times(Mat4.scale(1.7, 1.2, 1)).times(Mat4.translation(-1.75, 0.5, .7));
+        let cloud6_transform = cloud_transform.times(Mat4.scale(1.5, 1, 1)).times(Mat4.translation(-3, 0, 1));
+
+        this.shapes.s2.draw(context, program_state, cloud1_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud2_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud3_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud4_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud5_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud6_transform, this.materials.cloud);
+    }
+
+    draw_sky(context, program_state) {
+        var sky_transform = Mat4.identity().times(Mat4.scale(50, 50, 50));
+        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
+
+        this.draw_cloud(context, program_state, 49, 5, 10);
+        this.draw_cloud(context, program_state, 49, 7, 15, 0.75);
+        this.draw_cloud(context, program_state, 49, 7);
+        this.draw_cloud(context, program_state, 49, 6, 20);
+        this.draw_cloud(context, program_state, 49, 12, 2, 0.9);
+
+        this.draw_cloud(context, program_state, 47, 10, 5, 0.75);
+        this.draw_cloud(context, program_state, 47, 12, 22, 0.8);
+        this.draw_cloud(context, program_state, 47, 12, 43, 0.6);
+        this.draw_cloud(context, program_state, 47, 12, 14, 0.6);
+
+        this.draw_cloud(context, program_state, 45, 15, 25);
+        this.draw_cloud(context, program_state, 45, 20, 30, 0.6);
+        this.draw_cloud(context, program_state, 45, 13, 35, 0.8);
+        this.draw_cloud(context, program_state, 45, 17, 11, 0.6);
+        this.draw_cloud(context, program_state, 45, 16, 20, 0.8);
+    }
+
     draw_palmtrees(context, program_state) {
         let palmtree_transform = Mat4.identity().times(Mat4.scale(1.5, 1.5, 1.5)).times(Mat4.translation(0, 1.8, 0));
         this.shapes.palmtree.draw(context, program_state, palmtree_transform.times(Mat4.translation(0, 0, -17)), this.materials.tree);
@@ -548,6 +588,8 @@ export class Project extends Scene{
 
         this.draw_ground(context, program_state);
 
+        this.draw_sky(context, program_state);
+
         this.draw_palmtrees(context, program_state);
 
         this.draw_specialtree(context, program_state);
@@ -584,11 +626,6 @@ export class Project extends Scene{
                 this.body_tree_collision = true;
             }
         }
-
-        // add in a sky (sphere)
-        var sky_transform = Mat4.identity();
-        sky_transform = sky_transform.times(Mat4.scale(50, 50, 50))
-        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
 
         this.diagonal_view = Mat4.look_at(vec3(0, 10, 20), vec3(head_x, 0, head_z), vec3(0, 1, 0));
         this.top_view = Mat4.look_at(vec3(0, 20, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
