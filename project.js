@@ -16,6 +16,9 @@ export class Project extends Scene{
         this.body_tree_collision = false;
         this.continue_animation_post_collision = false;
 
+        this.get_start_time_once = false;
+        this.start_ouch_time;
+
         this.apple_dropping = false;
         this.drop_time = 1000000000;
 
@@ -49,6 +52,8 @@ export class Project extends Scene{
             ground: new defs.Capped_Cylinder(1, 12),
             seashell: new Shape_From_File("assets/seashell.obj"),
             grass: new Shape_From_File("assets/grass.obj"),
+            palmtree: new Shape_From_File("assets/palmtree3.obj"),
+            specialtree: new Shape_From_File("assets/tree.obj"),
         };
 
         this.shapes.ocean.arrays.texture_coord = this.shapes.ocean.arrays.texture_coord.map(x => x.times(5));
@@ -68,23 +73,23 @@ export class Project extends Scene{
             shirt: new Material(new defs.Phong_Shader(),
                 {ambient: 0.4, diffusivity: 0.6, color: hex_color("#ff0000")}),
             tree: new Material(new defs.Phong_Shader(),
-                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#4F7942")}),
+                {ambient: 0.5, diffusivity: 0.6, specularity: 0.1, color: hex_color("#4F7942")}),
             trunk: new Material(new defs.Phong_Shader(),
-                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#80461B")}),
+                {ambient: 0.5, diffusivity: 0.6, specularity: 0.1, color: hex_color("#80461B")}),
             apple: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             rock: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 0.2, color: hex_color("#888c8d")}),
-            cloud: new Material(new defs.Phong_Shader(),
-                {ambient: 0.9, diffusivity: 0.2, color: hex_color("#fffefc")}),
             grass: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
+                specularity: 0,
                 texture: new Texture("assets/grass.png")
             }),
             sand: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
+                specularity: 0,
                 texture: new Texture("assets/sand.jpeg")
             }),
             shell: new Material(new Textured_Phong(), {
@@ -102,6 +107,21 @@ export class Project extends Scene{
                 color: hex_color("#87CEFA"),
                 texture: new Texture("assets/sky.png")
             }),
+            palmtree: new Material(new defs.Textured_Phong(), {
+                ambient: 1,
+                color: hex_color("#000000"),
+                texture: new Texture("assets/Low Poly Palm Tree Render for Youtube.mtl")
+            }),
+            ouch: new Material(new defs.Textured_Phong(), {
+                ambient: 1,
+                color: hex_color("#000000"),
+                texture: new Texture("assets/ouch.jpg")
+            }),
+            palmtree: new Material(new defs.Textured_Phong(), {
+                ambient: 1,
+                color: hex_color("#000000"),
+                texture: new Texture("assets/Low Poly Palm Tree Render for Youtube.mtl")
+            })
         }
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -128,9 +148,9 @@ export class Project extends Scene{
         swayAngle = ((swayAngle/2) + ((swayAngle/2) * Math.sin(((2 * Math.PI) / 3) * t)));
 
         // how to stop movement after a certain time
-        if (t >= 14) {
-            swayAngle = 0;
-        }
+        // if (t >= 14) {
+        //     swayAngle = 0;
+        // }
 
         // axes for reference
         //this.shapes.axes.draw(context, program_state, model_transform, this.materials.test);  // for reference
@@ -149,7 +169,7 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             head_transform = head_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
         }
-        else if (t >= 10) { //&& t < 14
+        else if (t >= 10 && t < 17) { //&& t < 14
             // if time was x coord and x-pos was y coord, we want to go from (10, 0) to (14, 3.1) --> slope is 0.775
             var x_transform = 0.7625 * t - (0.7625 * 10);
             ret_x_transform = x_transform;
@@ -158,7 +178,7 @@ export class Project extends Scene{
             ret_z_transform = z_transform;
 
             if (this.body_tree_collision) {
-                head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.05, 0, -5.6));
+                head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)); // x coord was 3.05
                 this.continue_animation_post_collision = true;
             }
             else if(this.continue_animation_post_collision) {
@@ -168,9 +188,24 @@ export class Project extends Scene{
                 head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform));
             }
         }
-        // else if (t >= 14) {
-        //     head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.05, 0, -6.45));
-        // }
+        else if (t >= 17 && t < 18) {
+            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6));  // z coord was -5.6
+            head_transform = head_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+        }
+        else if (t >= 18 && t < 18.5) {
+            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0));
+        }
+        else if (t >= 18.5 && t < 25.5) {
+            var x_transform = 0.1857 * t - (0.1857 * 18.5);
+            ret_x_transform = x_transform;  
+            var y_transform = 0.1428 * t - (0.1428 * 18.5);
+            var z_transform = -7.1285 * t - (-7.1285 * 18.5);
+            ret_z_transform = z_transform;
+            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, y_transform, z_transform));
+        }
+        else if (t >= 25.5) {
+            head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(1.3, 1, -49.9));
+        }
         this.shapes.s3.draw(context, program_state, head_transform, this.materials.skin);
 
         // draw body
@@ -181,12 +216,17 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0));
         }
-        else if (t >= 10) {  //&& t < 14
+        else if (t >= 10 && t < 17) {  //&& t < 14
             var x_transform = -1 * t - (-1 * 10);
             var z_transform = 1.75 * t - (1.75 * 10);
             // little fella jumps backs after collision
             if (this.body_tree_collision) {
-                body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 6));
+                if (!this.get_start_time_once) {
+                    this.start_ouch_time = t;
+                    this.get_start_time_once = true;
+                }
+                
+                body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4));  // z coord used to be 6
                 this.continue_animation_post_collision = true;
             }
             // after collision movement
@@ -198,10 +238,21 @@ export class Project extends Scene{
                 body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, 0, z_transform));
             }
         }
-        // }
-        // else if (t >= 14) {
-        //     body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 7));  //ending position
-        // }
+        else if (t >= 17 && t < 18) {
+            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4));
+            body_transform = body_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+        }
+        else if (t >= 18 && t < 18.5) {
+            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0));
+        }
+        else if (t >= 18.5 && t < 25.5) {
+            var y_transform = -0.1142 * t - (-0.1142 * 18.5);
+            var z_transform = 8.5714 * t - (8.5714 * 18.5);
+            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(0, y_transform, z_transform));
+        }
+        else if (t >= 25.5) {
+            body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -0.8, 60));
+        }
         this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
         this.little_fella_body_location = body_transform; // might have to move this code to the spot the body is in when it hits the tree
 
@@ -213,11 +264,11 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0));
         }
-        else if (t >= 10) { //&& t < 14
+        else if (t >= 10 && t < 17) { //&& t < 14
             var x_transform = -4 * t - (-4 * 10);
             var z_transform = 7 * t - (7 * 10);
             if (this.body_tree_collision) {
-                left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 24));
+                left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 16));
                 this.continue_animation_post_collision = true;
             }
             else if (this.continue_animation_post_collision) {
@@ -227,9 +278,22 @@ export class Project extends Scene{
                 left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(swayAngle, 1, 0, 0));
             }
         }
-        // else if (t >= 14) {
-        //     left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
-        // }
+        else if (t >= 17 && t < 18) {
+            // left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20));  // FIX Rotation is wack
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-16, 0, 16));
+            left_leg_transform = left_leg_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+        }
+        else if (t >= 18 && t < 18.5) {
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20));
+        }
+        else if (t >= 18.5 && t < 25.5) {
+            var y_transform = -0.2857 * t - (-0.2857 * 18.5);
+            var z_transform = 34.285 * t - (34.285 * 18.5);
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20)).times(Mat4.translation(0, y_transform, z_transform)).times(Mat4.rotation(swayAngle, 1, 0, 0));
+        }
+        else if (t >= 25.5) {
+            left_leg_transform = left_leg_transform.times(Mat4.translation(1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(-1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20)).times(Mat4.translation(0, -2, 240));
+        }
 
         var right_leg_tranform = model_transform.times(Mat4.scale(0.1, 0.3, 0.1)).times(Mat4.translation(1.9, -2, 0));
         if (t >= 5 && t < 6) {
@@ -238,11 +302,11 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0));
         } 
-        else if (t >= 10 ) { //&& t < 14
+        else if (t >= 10 && t < 17) {
             var x_transform = -4 * t - (-4 * 10);
             var z_transform = 7 * t - (7 * 10);
             if (this.body_tree_collision) {
-                right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 24));
+                right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 16));
                 this.continue_animation_post_collision = true;
             }
             else if (this.continue_animation_post_collision) {
@@ -252,9 +316,22 @@ export class Project extends Scene{
                 right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(x_transform, 0, z_transform)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
             }
         }
-        // else if (t >= 14) {
-        //     right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 28));
-        // }
+        else if (t >= 17 && t < 18) {
+            // right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20)); // FIX Rotation is wack
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-16, 0, 16));
+            right_leg_tranform = right_leg_tranform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+        }
+        else if (t >= 18 && t < 18.5) {
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20));
+        }
+        else if (t >= 18.5 && t < 25.5) {
+            var y_transform = -0.2857 * t - (-0.2857 * 18.5);
+            var z_transform = 34.285 * t - (34.285 * 18.5);
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20)).times(Mat4.translation(0, y_transform, z_transform)).times(Mat4.rotation(-swayAngle, 1, 0, 0));
+        }
+        else if (t >= 25.5) {
+            right_leg_tranform = right_leg_tranform.times(Mat4.translation(-1.9, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(1.9, -2, 0)).times(Mat4.translation(-10.5, 0, -20)).times(Mat4.translation(0, -2, 240));
+        }
         this.shapes.cube.draw(context, program_state, left_leg_transform, this.materials.skin);
         this.shapes.cube.draw(context, program_state, right_leg_tranform, this.materials.skin);
 
@@ -266,11 +343,12 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0));
         }
-        else if (t >= 10) { // && t < 14
+        else if (t >= 10 && t < 17) { // && t < 14
             var x_transform = -0.8 * t - (-0.8 * 10);
             var z_transform = 7 * t - (7 * 10);
             if (this.body_tree_collision) {
-                left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.3, 0, 24));
+                left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.2, 0, 16));
+                this.continue_animation_post_collision = true;
             }
             else if (this.continue_animation_post_collision) {
 
@@ -279,9 +357,21 @@ export class Project extends Scene{
                 left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(x_transform, 0, z_transform));
             }
         }
-        // else if (t >= 14) {
-        //     left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.3, 0, 28));
-        // }
+        else if (t >= 17 && t < 18) {
+            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-3.2, 0, 16)).times(Mat4.rotation(t, 0, 1, 0));
+            // left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-2, 0, -19.7)); //FIX! Rotation is wonky   
+        }
+        else if (t >= 18 && t < 18.5) {
+            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-2, 0, -19.7));
+        }
+        else if (t >= 18.5 && t < 25.5) {
+            var y_transform = -0.5357 * t - (-0.5357 * 18.5);
+            var z_transform = 34.2857 * t - (34.2857 * 18.5);
+            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-2, 0, -19.7)).times(Mat4.translation(0, y_transform, z_transform));
+        }
+        else if (t >= 25.5) {
+            left_arm_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.scale(0.5, 0.1, 0.1)).times(Mat4.translation(-0.7, 0.8, 0)).times(Mat4.translation(-2, 0, -19.7)).times(Mat4.translation(0, -3.7, 240));
+        }
         var right_arm_tranform = left_arm_transform.times(Mat4.translation(1.4, 0, 0));
         this.shapes.cube.draw(context, program_state, left_arm_transform, this.materials.skin);
         this.shapes.cube.draw(context, program_state, right_arm_tranform, this.materials.skin);
@@ -294,11 +384,11 @@ export class Project extends Scene{
         else if (t >= 6 && t < 10) {
             left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0));
         }
-        else if (t >= 10) { // && t < 14
+        else if (t >= 10 && t < 17) {
             var x_transform = -2 * t - (-2 * 10);
             var z_transform = 3.5 * t - (3.5 * 10);
             if (this.body_tree_collision) {
-                left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 12));
+                left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 8));
                 this.continue_animation_post_collision = true;
             }
             else if (this.continue_animation_post_collision) {
@@ -308,9 +398,21 @@ export class Project extends Scene{
                 left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(x_transform, 0, z_transform));
             }
         }
-        // else if (t >= 14) {
-        //     left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 14));
-        // }
+        else if (t >= 17 && t < 18) {
+            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 8)).times(Mat4.translation(4.8, -0.4, 5)).times(Mat4.rotation(t * 1.5, 0, 1, 0));
+            // left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.rotation(t * 1.5, 0, 1, 0)); //  FIX Rotation is wonky
+        }
+        else if (t >= 18 && t < 18.5) {
+            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-10, 0.4, -10)); 
+        }
+        else if (t >= 18.5 && t < 25.5) {
+            var y_transform = -0.2857 * t - (-0.2857 * 18.5);
+            var z_transform = 17.1428 * t - (17.1428 * 18.5);
+            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-10, 0.4, -10)).times(Mat4.translation(0, y_transform, z_transform)); 
+        }
+        else if (t >= 25.5) {
+            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-10, 0.4, -10)).times(Mat4.translation(0, -2, 120)); 
+        }
         var right_hand_transform = left_hand_transform.times(Mat4.translation(9.6, 0, 0));
         this.shapes.s4.draw(context, program_state, left_hand_transform, this.materials.skin);
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
@@ -343,52 +445,8 @@ export class Project extends Scene{
 
     }
 
-    draw_cloud(context, program_state, x = 0, y = 0, start = 0, scale = 1) {
-        let t = program_state.animation_time / 1000;
-
-        let cloud_transform = Mat4.identity().times(Mat4.rotation(t/60 + start, 0, 1, 0)).times(Mat4.translation(x, y, 0));
-        cloud_transform = cloud_transform.times(Mat4.rotation(-Math.PI/2, 0, 1, 0)).times(Mat4.scale(scale, scale, scale));
-
-        let cloud1_transform = cloud_transform.times(Mat4.scale(3, 2, 2));
-        let cloud2_transform = cloud_transform.times(Mat4.scale(2, 1.5, 1.5)).times(Mat4.translation(1.5, 0, 0));
-        let cloud3_transform = cloud_transform.times(Mat4.scale(2, 1.5, 1)).times(Mat4.translation(-1.5, -0.5, 1));
-        let cloud4_transform = cloud_transform.times(Mat4.scale(1.5, 1.2, 1)).times(Mat4.translation(1.5, -1, 1));
-        let cloud5_transform = cloud_transform.times(Mat4.scale(1.7, 1.2, 1)).times(Mat4.translation(-1.75, 0.5, .7));
-        let cloud6_transform = cloud_transform.times(Mat4.scale(1.5, 1, 1)).times(Mat4.translation(-3, 0, 1));
-
-        this.shapes.s2.draw(context, program_state, cloud1_transform, this.materials.cloud);
-        this.shapes.s2.draw(context, program_state, cloud2_transform, this.materials.cloud);
-        this.shapes.s2.draw(context, program_state, cloud3_transform, this.materials.cloud);
-        this.shapes.s2.draw(context, program_state, cloud4_transform, this.materials.cloud);
-        this.shapes.s2.draw(context, program_state, cloud5_transform, this.materials.cloud);
-        this.shapes.s2.draw(context, program_state, cloud6_transform, this.materials.cloud);
-    }
-
-    draw_sky(context, program_state) {
-        var sky_transform = Mat4.identity().times(Mat4.scale(50, 50, 50));
-        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
-
-        this.draw_cloud(context, program_state, 49, 5, 10);
-        this.draw_cloud(context, program_state, 49, 7, 15, 0.75);
-        this.draw_cloud(context, program_state, 49, 7);
-        this.draw_cloud(context, program_state, 49, 6, 20);
-        this.draw_cloud(context, program_state, 49, 12, 2, 0.9);
-
-        this.draw_cloud(context, program_state, 47, 10, 5, 0.75);
-        this.draw_cloud(context, program_state, 47, 12, 22, 0.8);
-        this.draw_cloud(context, program_state, 47, 12, 43, 0.6);
-        this.draw_cloud(context, program_state, 47, 12, 14, 0.6);
-
-        this.draw_cloud(context, program_state, 45, 15, 25);
-        this.draw_cloud(context, program_state, 45, 20, 30, 0.6);
-        this.draw_cloud(context, program_state, 45, 13, 35, 0.8);
-        this.draw_cloud(context, program_state, 45, 17, 11, 0.6);
-        this.draw_cloud(context, program_state, 45, 16, 20, 0.8);
-    }
-
     draw_ground(context, program_state) {
         let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
-
         let ocean_rotate = Math.PI / 90 * dt;
         this.ocean_transform = this.ocean_transform.times(Mat4.rotation(ocean_rotate, 0, 0, 1));
         this.shapes.ocean.draw(context, program_state, this.ocean_transform, this.materials.water);
@@ -427,6 +485,43 @@ export class Project extends Scene{
         this.shapes.seashell.draw(context, program_state, seashell_transform.times(Mat4.translation(32, -4.4, 80)), this.materials.shell);
     }
 
+    draw_palmtrees(context, program_state) {
+        let palmtree_transform = Mat4.identity().times(Mat4.scale(1.5, 1.5, 1.5)).times(Mat4.translation(0, 1.8, 0));
+        this.shapes.palmtree.draw(context, program_state, palmtree_transform.times(Mat4.translation(0, 0, -17)), this.materials.tree);
+        this.shapes.palmtree.draw(context, program_state, palmtree_transform.times(Mat4.translation(-14, 0, 2)), this.materials.tree);
+        this.shapes.palmtree.draw(context, program_state, palmtree_transform.times(Mat4.translation(13, 0, 6)), this.materials.tree);
+    }
+
+    draw_specialtree(context, program_state) {
+        let tree_transform = Mat4.identity().times(Mat4.translation(0, 0.9, 0));
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(-5, 0, 3)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(1.5, 0, 1, 0).times(Mat4.translation(7, 0, -2))), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(0, -3, 0)).times(Mat4.rotation(-0.8, 0, 1, 0)).times(Mat4.translation(0, 3, 0)).times(Mat4.translation(7, 0, -2)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(1.5, 0, 1, 0).times(Mat4.translation(7, 0, -2))), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(3.7, 0, 1, 0).times(Mat4.translation(-7, 0, 5))), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.rotation(8, 0, 1, 0).times(Mat4.translation(15, 0, -5))), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(14, 0, 11)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(14, 0, -6)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(-14, 0, -8)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(-15, 0, 9)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(-6, 0, 14)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(3, 0, 13)), this.materials.tree);
+        this.shapes.specialtree.draw(context, program_state, tree_transform.times(Mat4.translation(8, 0, 14)), this.materials.tree);
+    }
+
+    draw_ouch(context, program_state) {
+        let t = program_state.animation_time / 1000;
+        if (this.body_tree_collision) {
+            let ouch_transform = Mat4.identity().times(Mat4.scale(1, 1, 0.1)).times(Mat4.translation(0.3, 3, -4));
+            if (t >= this.start_ouch_time + 2) {
+                // ouch emote will not be drawn anymore
+            }
+            else {
+                this.shapes.cube.draw(context, program_state, ouch_transform, this.materials.ouch);
+            }
+        }
+    }
+
     display(context, program_state) {
         // display():  Called once per frame of animation.
 
@@ -444,15 +539,8 @@ export class Project extends Scene{
         // lighting of sun
         const light_position = vec4(-5, 10, 7, 1);  //light position at center of sun sphere
         // The parameters of the Light are: position, color, size
-        // program_state.lights = [new Light(light_position, sun_color, 10**sun_rad)];
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
-        // create intro screen -- WORK IN PROGRESS
-        var intro_screen_transform = Mat4.identity().times(Mat4.scale(1, 0.9, 0.05)).times(Mat4.translation(0, 0, 175));
-        // if (!start_button_click) {
-            // this.shapes.cube.draw(context, program_state, intro_screen_transform, this.materials.introScreen);
-        // }
-        // otherwise don't draw it
 
         const [head_x, head_z] = this.draw_little_fella(context, program_state);
 
@@ -460,7 +548,11 @@ export class Project extends Scene{
 
         this.draw_ground(context, program_state);
 
-        this.draw_sky(context, program_state);
+        this.draw_palmtrees(context, program_state);
+
+        this.draw_specialtree(context, program_state);
+
+        this.draw_ouch(context, program_state);
 
         var bodies = new Array();
         bodies.push(new Body(this.shapes.trunk, this.materials.trunk, vec3(1, 1 + Math.random())).emplace(this.trunk_location, 0, 0));
@@ -479,30 +571,24 @@ export class Project extends Scene{
         for (let a of bodies) {
             // Cache the inverse of matrix of body "a" to save time.
             a.inverse = Mat4.inverse(a.drawn_location);
-
-            // a.linear_velocity = a.linear_velocity.minus(a.center.times(dt));
-            // Apply a small centripetal force to everything.
             a.material = this.materials.skin;
-            // Default color: white
-
-            // if (a.linear_velocity.norm() == 0)
-            //     continue;
-
             // *** Collision process is here ***
             // Loop through all bodies again (call each "b"):
             for (let b of bodies) {
                 // Pass the two bodies and the collision shape to check_if_colliding():
                 if (!a.check_if_colliding(b, collider))
                     continue;
-                // If we get here, we collided, so turn red and zero out the
-                // velocity so they don't inter-penetrate any further.
+                // If we get here, we collided
                 // console.log("Colliding");
                 a.material = this.materials.shirt; // not seeing this happen
                 this.body_tree_collision = true;
-                // a.linear_velocity = vec3(0, 0, 0);
-                // a.angular_velocity = 0;
             }
         }
+
+        // add in a sky (sphere)
+        var sky_transform = Mat4.identity();
+        sky_transform = sky_transform.times(Mat4.scale(50, 50, 50))
+        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
 
         this.diagonal_view = Mat4.look_at(vec3(0, 10, 20), vec3(head_x, 0, head_z), vec3(0, 1, 0));
         this.top_view = Mat4.look_at(vec3(0, 20, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
