@@ -80,6 +80,8 @@ export class Project extends Scene{
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             rock: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 0.2, color: hex_color("#888c8d")}),
+            cloud: new Material(new defs.Phong_Shader(),
+                {ambient: 0.9, diffusivity: 0.2, color: hex_color("#fffefc")}),
             grass: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
