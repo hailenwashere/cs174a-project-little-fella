@@ -375,8 +375,8 @@ export class Project extends Scene{
             }
         }
         else if (t >= 17 && t < 18) {
-            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 8)).times(Mat4.rotation(t * 1.5, 0, 1, 0));
-            // left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(t * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-10, 0.4, -10)); //  FIX Rotation is wonky
+            left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-4.8, 0.4, 0)).times(Mat4.translation(-8, 0, 8)).times(Mat4.translation(4.8, -0.4, 5)).times(Mat4.rotation(t * 1.5, 0, 1, 0));
+            // left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.rotation(t * 1.5, 0, 1, 0)); //  FIX Rotation is wonky
         }
         else if (t >= 18 && t < 18.5) {
             left_hand_transform = model_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(-10, 0.4, -10)); 
