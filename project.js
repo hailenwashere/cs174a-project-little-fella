@@ -68,9 +68,9 @@ export class Project extends Scene{
             shirt: new Material(new defs.Phong_Shader(),
                 {ambient: 0.4, diffusivity: 0.6, color: hex_color("#ff0000")}),
             tree: new Material(new defs.Phong_Shader(),
-                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#4F7942")}),
+                {ambient: 0.5, diffusivity: 0.6, specularity: .1, color: hex_color("#4F7942")}),
             trunk: new Material(new defs.Phong_Shader(),
-                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#80461B")}),
+                {ambient: 0.5, diffusivity: 0.6, specularity: .1, color: hex_color("#80461B")}),
             apple: new Material(new defs.Phong_Shader(),
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             rock: new Material(new defs.Phong_Shader(),
@@ -80,11 +80,13 @@ export class Project extends Scene{
             grass: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
+                specularity: 0,
                 texture: new Texture("assets/grass.png")
             }),
             sand: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
+                specularity: 0,
                 texture: new Texture("assets/sand.jpeg")
             }),
             shell: new Material(new Textured_Phong(), {
