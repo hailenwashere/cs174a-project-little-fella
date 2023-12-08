@@ -158,7 +158,10 @@ export class Project extends Scene{
         this.key_triggered_button("Front view", ["Control", "2"], () => this.attached = () => this.bottom_view);
         this.new_line();
         this.key_triggered_button("Top view",  ["Control", "3"], () => this.attached = () => this.top_view);
+        this.new_line();
+        this.key_triggered_button("Reset animation", ["x"], () => {location.reload();});
     }
+
 
     draw_little_fella(context, program_state) {
         var model_transform = Mat4.identity();
