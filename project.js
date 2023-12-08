@@ -75,6 +75,8 @@ export class Project extends Scene{
                 {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
             rock: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 0.2, color: hex_color("#888c8d")}),
+            cloud: new Material(new defs.Phong_Shader(),
+                {ambient: 0.9, diffusivity: 0.2, color: hex_color("#fffefc")}),
             grass: new Material(new defs.Textured_Phong(), {
                 color: hex_color("#000000"),
                 ambient: 1,
@@ -341,8 +343,52 @@ export class Project extends Scene{
 
     }
 
+    draw_cloud(context, program_state, x = 0, y = 0, start = 0, scale = 1) {
+        let t = program_state.animation_time / 1000;
+
+        let cloud_transform = Mat4.identity().times(Mat4.rotation(t/60 + start, 0, 1, 0)).times(Mat4.translation(x, y, 0));
+        cloud_transform = cloud_transform.times(Mat4.rotation(-Math.PI/2, 0, 1, 0)).times(Mat4.scale(scale, scale, scale));
+
+        let cloud1_transform = cloud_transform.times(Mat4.scale(3, 2, 2));
+        let cloud2_transform = cloud_transform.times(Mat4.scale(2, 1.5, 1.5)).times(Mat4.translation(1.5, 0, 0));
+        let cloud3_transform = cloud_transform.times(Mat4.scale(2, 1.5, 1)).times(Mat4.translation(-1.5, -0.5, 1));
+        let cloud4_transform = cloud_transform.times(Mat4.scale(1.5, 1.2, 1)).times(Mat4.translation(1.5, -1, 1));
+        let cloud5_transform = cloud_transform.times(Mat4.scale(1.7, 1.2, 1)).times(Mat4.translation(-1.75, 0.5, .7));
+        let cloud6_transform = cloud_transform.times(Mat4.scale(1.5, 1, 1)).times(Mat4.translation(-3, 0, 1));
+
+        this.shapes.s2.draw(context, program_state, cloud1_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud2_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud3_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud4_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud5_transform, this.materials.cloud);
+        this.shapes.s2.draw(context, program_state, cloud6_transform, this.materials.cloud);
+    }
+
+    draw_sky(context, program_state) {
+        var sky_transform = Mat4.identity().times(Mat4.scale(50, 50, 50));
+        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
+
+        this.draw_cloud(context, program_state, 49, 5, 10);
+        this.draw_cloud(context, program_state, 49, 7, 15, 0.75);
+        this.draw_cloud(context, program_state, 49, 7);
+        this.draw_cloud(context, program_state, 49, 6, 20);
+        this.draw_cloud(context, program_state, 49, 12, 2, 0.9);
+
+        this.draw_cloud(context, program_state, 47, 10, 5, 0.75);
+        this.draw_cloud(context, program_state, 47, 12, 22, 0.8);
+        this.draw_cloud(context, program_state, 47, 12, 43, 0.6);
+        this.draw_cloud(context, program_state, 47, 12, 14, 0.6);
+
+        this.draw_cloud(context, program_state, 45, 15, 25);
+        this.draw_cloud(context, program_state, 45, 20, 30, 0.6);
+        this.draw_cloud(context, program_state, 45, 13, 35, 0.8);
+        this.draw_cloud(context, program_state, 45, 17, 11, 0.6);
+        this.draw_cloud(context, program_state, 45, 16, 20, 0.8);
+    }
+
     draw_ground(context, program_state) {
         let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
+
         let ocean_rotate = Math.PI / 90 * dt;
         this.ocean_transform = this.ocean_transform.times(Mat4.rotation(ocean_rotate, 0, 0, 1));
         this.shapes.ocean.draw(context, program_state, this.ocean_transform, this.materials.water);
@@ -414,6 +460,8 @@ export class Project extends Scene{
 
         this.draw_ground(context, program_state);
 
+        this.draw_sky(context, program_state);
+
         var bodies = new Array();
         bodies.push(new Body(this.shapes.trunk, this.materials.trunk, vec3(1, 1 + Math.random())).emplace(this.trunk_location, 0, 0));
         bodies.push(new Body(this.shapes.cube, this.materials.shirt, vec3(1, 1 + Math.random())).emplace(this.little_fella_body_location, 0, 0));
@@ -455,11 +503,6 @@ export class Project extends Scene{
                 // a.angular_velocity = 0;
             }
         }
-
-        // add in a sky (sphere)
-        var sky_transform = Mat4.identity();
-        sky_transform = sky_transform.times(Mat4.scale(50, 50, 50))
-        this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
 
         this.diagonal_view = Mat4.look_at(vec3(0, 10, 20), vec3(head_x, 0, head_z), vec3(0, 1, 0));
         this.top_view = Mat4.look_at(vec3(0, 20, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
