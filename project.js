@@ -151,8 +151,8 @@ export class Project extends Scene{
     }
 
     make_control_panel() {
-        this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true;});
-        this.new_line();
+        //this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true;});
+        //this.new_line();
         this.key_triggered_button("Diagonal view", ["Control", "1"], () => this.attached = () => this.diagonal_view);
         this.new_line();
         this.key_triggered_button("Front view", ["Control", "2"], () => this.attached = () => this.bottom_view);
