@@ -156,14 +156,17 @@ export class Project extends Scene{
     }
 
     make_control_panel() {
-        this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true;});
-        this.new_line();
+        //this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true;});
+        //this.new_line();
         this.key_triggered_button("Diagonal view", ["Control", "1"], () => this.attached = () => this.diagonal_view);
         this.new_line();
         this.key_triggered_button("Front view", ["Control", "2"], () => this.attached = () => this.bottom_view);
         this.new_line();
         this.key_triggered_button("Top view",  ["Control", "3"], () => this.attached = () => this.top_view);
+        this.new_line();
+        this.key_triggered_button("Reset animation", ["x"], () => {location.reload();});
     }
+
 
     draw_little_fella(context, program_state) {
         var model_transform = Mat4.identity();
@@ -690,7 +693,7 @@ export class Project extends Scene{
         this.bottom_view = Mat4.look_at(vec3(0 + head_x, 1 + head_y, 10 + head_z), vec3(head_x, head_y, head_z), vec3(0, 1, 0));
 
         if (this.attached != undefined) {
-            program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1));
+            program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.03));
         }
 
     }
