@@ -20,7 +20,13 @@ export class Project extends Scene{
         this.start_ouch_time;
 
         this.apple_dropping = false;
-        this.drop_time = 1000000000;
+        this.got_drop_time = false;
+        this.drop_time;
+        this.apple_v = 0;
+        this.apple_y = 9;
+        this.bounce = 0;
+        this.show_apple = true;
+        this.apple_transform = Mat4.identity().times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(12, 9, -9));
 
         // for collision
         this.colliders = [
@@ -32,6 +38,7 @@ export class Project extends Scene{
         this.trunk_location;
         this.little_fella_body_location;
 
+
         // At the beginning of our program, load one of each of these shape definitions onto the GPU.
         this.shapes = {
             torus: new defs.Torus(15,15),
@@ -42,6 +49,7 @@ export class Project extends Scene{
             axes: new defs.Axis_Arrows(),
             cube: new defs.Cube(),
             trunk: new defs.Capped_Cylinder(15, 15),
+            cone: new defs.Rounded_Closed_Cone(15, 15),
 
             s1: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(1),
             s2: new (defs.Subdivision_Sphere.prototype.make_flat_shaded_version())(2),
@@ -87,7 +95,7 @@ export class Project extends Scene{
                 texture: new Texture("assets/trunk.jpeg")
             }),
             apple: new Material(new defs.Phong_Shader(),
-                {ambient: 0.5, diffusivity: 0.6, color: hex_color("#FF0000")}),
+                {ambient: 0.5, diffusivity: 0.6, specularity: 0.6, color: hex_color("#FF0000")}),
             rock: new Material(new defs.Phong_Shader(),
                 {ambient: 1, diffusivity: 0.2, color: hex_color("#888c8d")}),
             grass: new Material(new defs.Textured_Phong(), {
@@ -126,14 +134,11 @@ export class Project extends Scene{
                 ambient: 1,
                 color: hex_color("#000000"),
                 texture: new Texture("assets/ouch.jpg")
-            }),
-            palmtree: new Material(new defs.Textured_Phong(), {
-                ambient: 1,
-                color: hex_color("#000000"),
-                texture: new Texture("assets/Low Poly Palm Tree Render for Youtube.mtl")
             })
         }
         this.shapes.trunk.arrays.texture_coord.forEach(p => p.scale_by(0.1));
+        this.shapes.cone.arrays.texture_coord.forEach(p => p.scale_by(0.3));
+
 
         this.initial_camera_location = Mat4.look_at(vec3(0, 10, 20), vec3(0, 0, 0), vec3(0, 1, 0));
         this.top_camera_location = Mat4.look_at(vec3(0, 20, 10), vec3(0, 0, 0), vec3(0, 1, 0));
@@ -142,7 +147,7 @@ export class Project extends Scene{
     }
 
     make_control_panel() {
-        this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true; this.drop_time = animation_time / 1000.0;});
+        this.key_triggered_button("Drop apple", ["0"], () => {this.apple_dropping = true;});
         this.new_line();
         this.key_triggered_button("Diagonal view", ["Control", "1"], () => this.attached = () => this.diagonal_view);
         this.new_line();
@@ -432,29 +437,85 @@ export class Project extends Scene{
     }
 
     draw_tree(context, program_state) {
-        // add index parameter later for multiple
-        var top_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4.8, 3.9, -4)); // 4.8, 1.7, 2
-        var left_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(4, 2.6, -4));  //4, 0.4, 2
-        var right_transform = Mat4.identity().times(Mat4.scale(.6, .6, .6)).times(Mat4.translation(5.6, 2.6, -4)); //5.6, 0.4, 2
+        let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
+        var x_dis;
+
+        // top parts of tree should move
+        if (this.apple_dropping && (t - this.drop_time) < 0.8) {
+            x_dis = Math.sin(t * (Math.PI)) / 100;
+        } else x_dis = 0;
+
+        // calculate each tree part's transformations
+        var top_transform = Mat4.identity().times(Mat4.scale(.6 + x_dis, .6, .6)).times(Mat4.translation(4.8, 3.9, -4)); // 4.8, 1.7, 2
+        var left_transform = Mat4.identity().times(Mat4.scale(.6 + x_dis, .6, .6)).times(Mat4.translation(4, 2.6, -4));  //4, 0.4, 2
+        var right_transform = Mat4.identity().times(Mat4.scale(.6 + x_dis, .6, .6)).times(Mat4.translation(5.6, 2.6, -4)); //5.6, 0.4, 2
         var trunk_transform = Mat4.identity().times(Mat4.rotation(.5 * Math.PI, 1, 0, 0)).times(Mat4.scale(0.4, 0.4, 2.5)).times(Mat4.translation(7, -6, -0.1));  //original translation 7, 3, 0.8    original scale 0.4, 0.4, 1.1
+        var cone1_transform = Mat4.identity().times(Mat4.scale(0.15, 0.15, 0.15)).times(Mat4.translation(16.5, -6, -18)).times(Mat4.rotation(1.5 * Math.PI, 1, 0, 0));
+        var cone2_transform = Mat4.identity().times(Mat4.scale(0.15, 0.15, 0.15)).times(Mat4.translation(16.5, -6, -14)).times(Mat4.rotation(1.5 * Math.PI, 1, 0, 0));
+        var cone3_transform = Mat4.identity().times(Mat4.scale(0.15, 0.15, 0.15)).times(Mat4.translation(21, -6, -17.5)).times(Mat4.rotation(1.5 * Math.PI, 1, 0, 0));
+        var cone4_transform = Mat4.identity().times(Mat4.scale(0.15, 0.15, 0.15)).times(Mat4.translation(20.5, -6, -14)).times(Mat4.rotation(1.5 * Math.PI, 1, 0, 0));
+
+        //apple falling
+        if (this.body_tree_collision) {
+            if (!this.got_drop_time) {
+                this.apple_dropping = true;
+                this.got_drop_time = true;
+                this.drop_time = t;
+            }
+        }
+
+        if(this.apple_dropping) {
+            this.apple_v += dt * -9.8;
+            this.apple_y += this.apple_v * dt
+
+            // If about to fall through floor, reverse y velocity to bounce
+            if (this.apple_y < -5 && this.apple_v < 0)
+            {
+                this.apple_v *= -.8;
+                this.bounce += 1;
+            }
+            // stop displaying after 3 bounces
+            if (this.bounce > 3) this.show_apple = false;
+
+            this.apple_transform = this.apple_transform.times(Mat4.translation(0, this.apple_v * dt, 0));  // original translation 12, 6, 8
+
+
+        } else {
+            this.apple_transform = Mat4.identity().times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(11, 9, -9));  // original translation 12, 6, 8//
+        }
+
+        if(this.show_apple) {
+            this.shapes.sphere.draw(context, program_state, this.apple_transform, this.materials.apple);
+        }
+
+        var apple2_transform = Mat4.identity().times(Mat4.scale(0.2 + x_dis/2, 0.2, 0.2)).times(Mat4.translation(14.2, 12.5, -9));
+        var apple3_transform = Mat4.identity().times(Mat4.scale(0.2 + x_dis/2, 0.2, 0.2)).times(Mat4.translation(16.5, 9, -9));
+        this.shapes.sphere.draw(context, program_state, apple2_transform, this.materials.apple);
+        this.shapes.sphere.draw(context, program_state, apple3_transform, this.materials.apple);
+
+        // for apple falling on the ground, can use Inertia_Demo (unser assets/collisions-demo.js) for inspo) <- fanks <3
+
+        // top part of tree should shake
+        if(this.apple_dropping && (t - this.drop_time) < 1) {
+
+        }
 
         // this.shapes.tree.draw(context, program_state, Mat4.identity(), this.materials.trunk);
         this.shapes.sphere.draw(context, program_state, top_transform, this.materials.tree2);
         this.shapes.sphere.draw(context, program_state, left_transform, this.materials.tree2);
         this.shapes.sphere.draw(context, program_state, right_transform, this.materials.tree2);
+
         this.shapes.trunk.draw(context, program_state, trunk_transform, this.materials.trunk2);
+        this.shapes.cone.draw(context, program_state, cone1_transform, this.materials.trunk2);
+        this.shapes.cone.draw(context, program_state, cone2_transform, this.materials.trunk2);
+        this.shapes.cone.draw(context, program_state, cone3_transform, this.materials.trunk2);
+        this.shapes.cone.draw(context, program_state, cone4_transform, this.materials.trunk2);
+
         this.trunk_location = trunk_transform;
 
-        let t = program_state.animation_time / 1000.0;
-        var apple_transform;
-        if (this.apple_dropping) {
-            apple_transform = apple_transform.times(Mat4.translation(0, 0, -1 * (t - this.drop_time)));
-        } else apple_transform = Mat4.identity().times(Mat4.scale(0.2, 0.2, 0.2)).times(Mat4.translation(12, 9, -9));  // original translation 12, 6, 8
-        this.shapes.sphere.draw(context, program_state, apple_transform, this.materials.apple);
-
-        // for apple falling on the ground, can use Inertia_Demo (unser assets/collisions-demo.js) for inspo)
-
     }
+
+
 
     draw_ground(context, program_state) {
         let t = program_state.animation_time / 1000, dt = program_state.animation_delta_time / 1000;
