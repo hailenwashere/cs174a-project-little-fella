@@ -19,6 +19,11 @@ export class Project extends Scene{
         this.get_start_time_once = false;
         this.start_ouch_time;
 
+        this.ret_x_transform = 0;
+        this.ret_y_transform = 0;
+        this.ret_z_transform = 0;
+        this.head_x_pos = 0;
+
         this.body_rotate = 0;
         this.head_rotate = 0;
         this.arm_rotate = 0;
@@ -180,8 +185,8 @@ export class Project extends Scene{
         var head_transform = model_transform.times(Mat4.scale(1.2, 1.05, 1)).times(Mat4.scale(-0.4, -0.4, -0.4)).times(Mat4.translation(0, -2, 0));
 
         // x and z coordinates to return to camera matrix
-        var ret_x_transform = 0;
-        var ret_z_transform = 0;
+        // var ret_x_transform = 0;
+        // var ret_z_transform = 0;
 
         // rotate little fella head
         if (t >= 5 && t < 6) {
@@ -194,14 +199,17 @@ export class Project extends Scene{
         else if (t >= 10 && t < 17) { //&& t < 14
             // if time was x coord and x-pos was y coord, we want to go from (10, 0) to (14, 3.1) --> slope is 0.775
             var x_transform = 0.7625 * t - (0.7625 * 10);
-            ret_x_transform = x_transform;
+            this.ret_x_transform = x_transform;
+            
             // want to go from (10, 0) to (14, -6.4) --> slope is -1.6
             var z_transform = -1.6 * t - (-1.6 * 10);
-            ret_z_transform = z_transform;
+            this.ret_z_transform = z_transform;
 
             if (this.body_tree_collision) {
                 head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)); // x coord was 3.05
                 this.continue_animation_post_collision = true;
+                this.ret_x_transform = 3.09;
+                this.ret_z_transform = -3.6;
             }
             else if(this.continue_animation_post_collision) {
 
@@ -213,24 +221,27 @@ export class Project extends Scene{
         else if (t >= 17 && t < 18) {
             head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6));  // z coord was -5.6
             head_transform = head_transform.times(Mat4.rotation(t * 1.5, 0, 1, 0));
+            this.ret_x_transform = 3.09;
+            this.head_x_pos = 3.09;
         }
         else if (t >= 18 && t < 18.5) {
             head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0));
         }
         else if (t >= 18.5 && t < 25.5) {
             var x_transform = 0.1857 * t - (0.1857 * 18.5);
-            ret_x_transform = x_transform;  
+            this.ret_x_transform = this.ret_x_transform - (x_transform * 0.1);
             var y_transform = 0.1428 * t - (0.1428 * 18.5);
+            // this.y_transform = y_transform;
             var z_transform = -7.1285 * t - (-7.1285 * 18.5);
-            ret_z_transform = z_transform;
+            // this.ret_z_transform = z_transform;
             head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(x_transform, y_transform, z_transform));
         }
         else if (t >= 25.5) {
             head_transform = head_transform.times(Mat4.translation(0, 2, 0)).times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(1.3, 1, -49.9));
+            this.ret_x_transform = -22;
+            this.ret_y_transform = 1;
+            // this.ret_z_transform = -3.6;
         }
-        // else if (t >= 27) {
-        //     head_transform = head_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(0, 2, 0)).times(Mat4.translation(0, -2, 0)).times(Mat4.rotation(t * 0.4, 0, 1, 0)).times(Mat4.translation(3.09, 0, -3.6)).times(Mat4.translation(1.3, 1, -47));
-        // }
         this.shapes.s3.draw(context, program_state, head_transform, this.materials.skin);
 
         // draw body
@@ -276,13 +287,11 @@ export class Project extends Scene{
             var y_transform = -0.1142 * t - (-0.1142 * 18.5);
             var z_transform = 8.5714 * t - (8.5714 * 18.5);
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(0, y_transform, z_transform));
+            // body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(this.body_rotate, 0, 1, 0)).times(Mat4.translation(0, y_transform, z_transform));
         }
         else if (t >= 25.5) {
             body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(18 * 1.5, 0, 1, 0)).times(Mat4.translation(0, -0.8, 60));
         }
-        // else if (t > 27) {
-        //     body_transform = body_transform.times(Mat4.rotation(6 * 1.5, 0, 1, 0)).times(Mat4.translation(-4, 0, 4)).times(Mat4.rotation(t * 0.4, 0, 1, 0)).times(Mat4.translation(0, -0.8, 53));
-        // }
         this.shapes.cube.draw(context, program_state, body_transform, this.materials.shirt);
         this.little_fella_body_location = body_transform; // might have to move this code to the spot the body is in when it hits the tree
 
@@ -447,7 +456,7 @@ export class Project extends Scene{
         this.shapes.s4.draw(context, program_state, left_hand_transform, this.materials.skin);
         this.shapes.s4.draw(context, program_state, right_hand_transform, this.materials.skin);
 
-        return [ret_x_transform, ret_z_transform];
+        return [this.ret_x_transform, this.ret_y_transform, this.ret_z_transform];
     }
 
     draw_tree(context, program_state) {
@@ -628,7 +637,7 @@ export class Project extends Scene{
         program_state.lights = [new Light(light_position, color(1, 1, 1, 1), 1000)];
 
 
-        const [head_x, head_z] = this.draw_little_fella(context, program_state);
+        const [head_x, head_y, head_z] = this.draw_little_fella(context, program_state);
 
         this.draw_tree(context, program_state);
 
@@ -676,9 +685,9 @@ export class Project extends Scene{
         sky_transform = sky_transform.times(Mat4.scale(50, 50, 50))
         this.shapes.sphere.draw(context, program_state, sky_transform, this.materials.sky);
 
-        this.diagonal_view = Mat4.look_at(vec3(0, 10, 20), vec3(head_x, 0, head_z), vec3(0, 1, 0));
-        this.top_view = Mat4.look_at(vec3(0, 20, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
-        this.bottom_view = Mat4.look_at(vec3(0, 1, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
+        this.diagonal_view = Mat4.look_at(vec3(0 + head_x, 10 + head_y, 20 + head_z), vec3(head_x, head_y, head_z), vec3(0, 1, 0));
+        this.top_view = Mat4.look_at(vec3(0 + head_x, 20 + head_y, 10 + head_z), vec3(head_x, head_y, head_z), vec3(0, 1, 0));
+        this.bottom_view = Mat4.look_at(vec3(0 + head_x, 1 + head_y, 10 + head_z), vec3(head_x, head_y, head_z), vec3(0, 1, 0));
 
         if (this.attached != undefined) {
             program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.1));
