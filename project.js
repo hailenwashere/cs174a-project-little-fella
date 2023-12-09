@@ -732,9 +732,9 @@ export class Project extends Scene{
             }
         }
 
-        this.diagonal_view = Mat4.look_at(vec3(0, 10, 20), vec3(head_x, 0, head_z), vec3(0, 1, 0));
-        this.top_view = Mat4.look_at(vec3(0, 20, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
-        this.bottom_view = Mat4.look_at(vec3(0, 1, 10), vec3(head_x, 0, head_z), vec3(0, 1, 0));
+        this.diagonal_view = Mat4.look_at(vec3(0+head_x, 10+head_y, 20+head_z), vec3(head_x, head_y, head_z), vec3(0, 1, 0));
+        this.top_view = Mat4.look_at(vec3(0+head_x, 20+head_y, 10+head_z), vec3(head_x, head_y, head_z), vec3(0, 1, 0));
+        this.bottom_view = Mat4.look_at(vec3(0+head_x, 1+head_y, 10+head_z), vec3(head_x, head_y, head_z), vec3(0, 1, 0));
 
         if (this.attached != undefined) {
             program_state.camera_inverse = this.attached().map((x, i) => Vector.from(program_state.camera_inverse[i]).mix(x, 0.03));
