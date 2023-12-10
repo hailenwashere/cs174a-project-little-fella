@@ -524,11 +524,6 @@ export class Project extends Scene{
 
         // for apple falling on the ground, can use Inertia_Demo (unser assets/collisions-demo.js) for inspo) <- fanks <3
 
-        // top part of tree should shake
-        if(this.apple_dropping && (t - this.drop_time) < 1) {
-
-        }
-
         // this.shapes.tree.draw(context, program_state, Mat4.identity(), this.materials.trunk);
         this.shapes.sphere.draw(context, program_state, top_transform, this.materials.tree2);
         this.shapes.sphere.draw(context, program_state, left_transform, this.materials.tree2);
